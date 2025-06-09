@@ -112,6 +112,41 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 }
             },
             {
+                name: "generate-viewcontroller",
+                description: "Generate complete view controller with FrameLayoutKit layouts",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        className: { type: "string", default: "CustomViewController" },
+                        layoutStructure: {
+                            type: "object",
+                            properties: {
+                                mainLayout: {
+                                    type: "string",
+                                    enum: ["VStackLayout", "HStackLayout", "FrameLayout", "ScrollStackView"]
+                                },
+                                views: {
+                                    type: "array",
+                                    items: {
+                                        type: "object",
+                                        properties: {
+                                            name: { type: "string" },
+                                            type: { type: "string" },
+                                            text: { type: "string" },
+                                            properties: { type: "object" }
+                                        },
+                                        required: ["name", "type"]
+                                    }
+                                },
+                                configuration: { type: "object" }
+                            },
+                            required: ["mainLayout", "views"]
+                        }
+                    },
+                    required: ["layoutStructure"]
+                }
+            },
+            {
                 name: "generate-migration-guide",
                 description: "Generate a migration guide for converting projects to FrameLayoutKit",
                 inputSchema: {
@@ -173,6 +208,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 content: [{
                     type: "text",
                     text: result.report
+                }]
+            };
+        }
+
+        case "generate-viewcontroller": {
+            const { className = "CustomViewController", layoutStructure } = args;
+            const generator = new ViewControllerGenerator();
+            const code = generator.generateViewController(className, layoutStructure);
+
+            return {
+                content: [{
+                    type: "text",
+                    text: code
                 }]
             };
         }
@@ -599,6 +647,100 @@ class FrameLayoutGenerator {
     }
 }
 
+// Complete View Controller generator
+class ViewControllerGenerator {
+    generateViewController(className, layoutStructure) {
+        let code = '';
+
+        // Import and class declaration
+        code += `import UIKit\n`;
+        code += `import FrameLayoutKit\n\n`;
+        code += `class ${className}: UIViewController {\n\n`;
+
+        // Properties for views
+        code += `    // MARK: - UI Components\n`;
+        layoutStructure.views.forEach(view => {
+            code += `    private lazy var ${view.name} = ${this.generateLazyViewProperty(view)}\n`;
+        });
+
+        // Main layout property
+        code += `    private lazy var mainLayout = ${layoutStructure.mainLayout}()\n\n`;
+
+        // ViewDidLoad
+        code += `    override func viewDidLoad() {\n`;
+        code += `        super.viewDidLoad()\n`;
+        code += `        view.backgroundColor = .systemBackground\n`;
+        code += `        setupLayout()\n`;
+        code += `    }\n\n`;
+
+        // Setup layout method
+        code += `    // MARK: - Layout Setup\n`;
+        code += `    private func setupLayout() {\n`;
+
+        // Configure main layout
+        if (layoutStructure.configuration) {
+            const config = layoutStructure.configuration;
+            code += `        // Configure main layout\n`;
+            const chainMethods = [];
+
+            if (config.spacing !== undefined) {
+                chainMethods.push(`.spacing(${config.spacing})`);
+            }
+            if (config.distribution) {
+                chainMethods.push(`.distribution(.${config.distribution})`);
+            }
+            if (config.padding !== undefined) {
+                if (typeof config.padding === 'number') {
+                    chainMethods.push(`.padding(${config.padding})`);
+                } else {
+                    chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+                }
+            }
+
+            if (chainMethods.length > 0) {
+                code += `        mainLayout\n`;
+                chainMethods.forEach(method => {
+                    code += `            ${method}\n`;
+                });
+                code += `\n`;
+            }
+        }
+
+        // Add views to layout
+        code += `        // Add views to layout\n`;
+        layoutStructure.views.forEach(view => {
+            if (view.properties && view.properties.fixedHeight) {
+                code += `        (mainLayout + ${view.name}).fixedHeight(${view.properties.fixedHeight})\n`;
+            } else {
+                code += `        mainLayout + ${view.name}\n`;
+            }
+        });
+
+        // Add layout to view hierarchy - ONLY using FrameLayoutKit methods
+        code += `\n        // Add to view hierarchy\n`;
+        code += `        view.addSubview(mainLayout)\n`;
+        code += `        mainLayout.fitToSuperview()\n`;
+        code += `    }\n`;
+        code += `}\n`;
+
+        return code;
+    }
+
+    generateLazyViewProperty(view) {
+        const frameLayoutGenerator = new FrameLayoutGenerator();
+        let viewCreation = frameLayoutGenerator.generateViewCreation(view);
+
+        // Remove the outer closure and return statement for lazy property
+        viewCreation = viewCreation.replace(/^\{\s*\n/, '').replace(/\s*return \w+\s*\n\}.*$/, '');
+
+        // Fix indentation for lazy property
+        const lines = viewCreation.split('\n');
+        const indentedLines = lines.map(line => line ? `        ${line}` : line);
+
+        return `{\n${indentedLines.join('\n')}\n    }()`;
+    }
+}
+
 // Auto Layout to FrameLayoutKit converter
 class AutoLayoutConverter {
     async convert(swiftCode, options) {
@@ -789,6 +931,58 @@ class FrameLayoutValidator {
     validateSyntax(code) {
         const errors = [];
 
+        // CHECK FOR FORBIDDEN AUTOLAYOUT CODE - THIS IS CRITICAL
+        const autoLayoutChecks = [
+            {
+                pattern: /NSLayoutConstraint/,
+                error: 'CRITICAL ERROR: NSLayoutConstraint detected! FrameLayoutKit should NEVER use AutoLayout constraints.'
+            },
+            {
+                pattern: /\.constraint\(/,
+                error: 'CRITICAL ERROR: AutoLayout constraint method detected! Use FrameLayoutKit methods instead.'
+            },
+            {
+                pattern: /translatesAutoresizingMaskIntoConstraints/,
+                error: 'CRITICAL ERROR: AutoLayout mask constraint detected! FrameLayoutKit handles layout automatically.'
+            },
+            {
+                pattern: /\.activate\(\[/,
+                error: 'CRITICAL ERROR: NSLayoutConstraint.activate detected! Use FrameLayoutKit operators instead.'
+            },
+            {
+                pattern: /\.(topAnchor|bottomAnchor|leadingAnchor|trailingAnchor|centerXAnchor|centerYAnchor)/,
+                error: 'CRITICAL ERROR: AutoLayout anchors detected! Use FrameLayoutKit alignment methods instead.'
+            }
+        ];
+
+        autoLayoutChecks.forEach(check => {
+            if (check.pattern.test(code)) {
+                errors.push(check.error);
+            }
+        });
+
+        // Check for incorrect FrameLayoutKit syntax
+        const frameLaoutSyntaxChecks = [
+            {
+                pattern: /\.centerLayout\(\)/,
+                error: 'SYNTAX ERROR: .centerLayout() does not exist. Use (layout + view).aligns(.center, .center) instead.'
+            },
+            {
+                pattern: /\.frameLayout\(height:/,
+                error: 'SYNTAX ERROR: .frameLayout(height:) is incorrect. Use (layout + view).fixedHeight() instead.'
+            },
+            {
+                pattern: /\.frameLayout\(width:/,
+                error: 'SYNTAX ERROR: .frameLayout(width:) is incorrect. Use (layout + view).fixedWidth() instead.'
+            }
+        ];
+
+        frameLaoutSyntaxChecks.forEach(check => {
+            if (check.pattern.test(code)) {
+                errors.push(check.error);
+            }
+        });
+
         // Check for common syntax errors
         const syntaxChecks = [
             {
@@ -849,8 +1043,15 @@ class FrameLayoutValidator {
 
     isValidChainMethod(chain) {
         const validMethods = [
-            'padding', 'align', 'fixedSize', 'spacing', 'distribution',
-            'axis', 'rows', 'columns', 'debug', 'flexible', 'minSize', 'maxSize'
+            // Layout configuration methods
+            'padding', 'align', 'aligns', 'spacing', 'distribution', 'axis',
+            // Size methods
+            'fixedSize', 'fixedWidth', 'fixedHeight', 'minSize', 'maxSize',
+            'flexible', 'flexibleWidth', 'flexibleHeight',
+            // Grid layout methods
+            'rows', 'columns', 'interItemSpacing', 'lineSpacing',
+            // Utility methods
+            'debug', 'isOverlapped', 'fitToSuperview'
         ];
 
         const methodMatch = chain.match(/\.(\w+)\(/);
