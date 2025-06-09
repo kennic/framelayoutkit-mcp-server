@@ -221,52 +221,94 @@ class FrameLayoutGenerator {
     }
 
     generateFrameLayout(view, config) {
-        let code = `let ${view.name}Layout = FrameLayout()\n`;
+        let code = '';
+
+        // Create view
+        code += `// Create view\n`;
         code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
 
-        // Assign view using + operator
-        code += `${view.name}Layout + ${view.name}\n`;
+        // Create and configure layout
+        code += `\n// Create and configure layout\n`;
+        code += `let ${view.name}Layout = FrameLayout()\n`;
 
-        // Apply configuration
-        if (config.padding) {
-            code += this.generatePadding(`${view.name}Layout`, config.padding);
+        // Build method chain
+        const chainMethods = [];
+
+        if (config.padding !== undefined) {
+            if (typeof config.padding === 'number') {
+                chainMethods.push(`.padding(${config.padding})`);
+            } else {
+                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+            }
         }
 
         if (config.alignment) {
-            code += `${view.name}Layout.align(`;
-            code += `.${config.alignment.vertical || 'center'}, `;
-            code += `.${config.alignment.horizontal || 'center'})\n`;
+            chainMethods.push(`.align(.${config.alignment.vertical || 'center'}, .${config.alignment.horizontal || 'center'})`);
         }
+
+        // Apply method chain if we have any configurations
+        if (chainMethods.length > 0) {
+            code += `${view.name}Layout\n`;
+            chainMethods.forEach(method => {
+                code += `    ${method}\n`;
+            });
+        }
+
+        // Add view to layout
+        code += `\n// Add view to layout\n`;
+        code += `${view.name}Layout + ${view.name}\n`;
 
         return code;
     }
 
     generateStackLayout(stackType, views, config) {
-        let code = `let stackLayout = ${stackType}()\n`;
+        let code = '';
 
-        // Configure stack properties
-        if (config.spacing !== undefined) {
-            code += `stackLayout.spacing = ${config.spacing}\n`;
-        }
+        // Create views section
+        code += `// Create views\n`;
+        views.forEach(view => {
+            code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
+        });
+
+        // Create and configure layout section
+        code += `\n// Create and configure layout\n`;
+        code += `let stackLayout = ${stackType}()\n`;
+
+        // Build method chain
+        const chainMethods = [];
 
         if (config.distribution) {
-            code += `stackLayout.distribution = .${config.distribution}\n`;
+            chainMethods.push(`.distribution(.${config.distribution})`);
         }
 
-        if (config.padding) {
-            code += this.generatePadding('stackLayout', config.padding);
+        if (config.spacing !== undefined) {
+            chainMethods.push(`.spacing(${config.spacing})`);
         }
 
-        // Create and add views
-        code += `\n// Add views to stack\n`;
-        views.forEach((view, index) => {
-            code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
-            code += `stackLayout + ${view.name}\n`;
-
-            // Add spacing between specific items if needed
-            if (index < views.length - 1 && config.spacing === undefined) {
-                code += `stackLayout + 8 // Default spacing\n`;
+        if (config.padding !== undefined) {
+            if (typeof config.padding === 'number') {
+                chainMethods.push(`.padding(${config.padding})`);
+            } else {
+                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
             }
+        }
+
+        // Apply method chain if we have any configurations
+        if (chainMethods.length > 0) {
+            code += `stackLayout\n`;
+            chainMethods.forEach((method, index) => {
+                if (index === chainMethods.length - 1) {
+                    code += `    ${method}\n`;
+                } else {
+                    code += `    ${method}\n`;
+                }
+            });
+        }
+
+        // Add views to layout
+        code += `\n// Add views to layout\n`;
+        views.forEach(view => {
+            code += `stackLayout + ${view.name}\n`;
         });
 
         return code;
@@ -277,40 +319,59 @@ class FrameLayoutGenerator {
             throw new Error("DoubleFrameLayout requires exactly 2 views");
         }
 
-        let code = `let doubleLayout = DoubleFrameLayout()\n`;
-
-        // Configure properties
-        if (config.axis) {
-            code += `doubleLayout.axis = .${config.axis}\n`;
-        }
-
-        if (config.spacing !== undefined) {
-            code += `doubleLayout.spacing = ${config.spacing}\n`;
-        }
-
-        if (config.distribution) {
-            code += `doubleLayout.distribution = .${config.distribution}\n`;
-        }
-
-        if (config.isOverlapped) {
-            code += `doubleLayout.isOverlapped = true\n`;
-        }
+        let code = '';
 
         // Create views
-        code += `\n// Create views\n`;
+        code += `// Create views\n`;
         code += `let ${views[0].name} = ${this.generateViewCreation(views[0])}\n`;
         code += `let ${views[1].name} = ${this.generateViewCreation(views[1])}\n`;
 
-        // Assign views using operators
-        code += `\n// Assign views using operators\n`;
+        // Create and configure layout
+        code += `\n// Create and configure layout\n`;
+        code += `let doubleLayout = DoubleFrameLayout()\n`;
+
+        // Build method chain
+        const chainMethods = [];
+
+        if (config.axis) {
+            chainMethods.push(`.axis(.${config.axis})`);
+        }
+
+        if (config.spacing !== undefined) {
+            chainMethods.push(`.spacing(${config.spacing})`);
+        }
+
+        if (config.distribution) {
+            chainMethods.push(`.distribution(.${config.distribution})`);
+        }
+
+        if (config.isOverlapped) {
+            chainMethods.push(`.isOverlapped(true)`);
+        }
+
+        // Apply method chain if we have any configurations
+        if (chainMethods.length > 0) {
+            code += `doubleLayout\n`;
+            chainMethods.forEach(method => {
+                code += `    ${method}\n`;
+            });
+        }
+
+        // Add views to layout
+        code += `\n// Add views to layout\n`;
         code += `doubleLayout <+ ${views[0].name}\n`;
         code += `doubleLayout +> ${views[1].name}\n`;
 
         // Configure individual frame layouts if needed
         if (config.padding) {
-            code += `\n// Configure padding\n`;
-            code += `doubleLayout.leftFrameLayout.padding(${this.paddingValue(config.padding)})\n`;
-            code += `doubleLayout.rightFrameLayout.padding(${this.paddingValue(config.padding)})\n`;
+            code += `\n// Configure padding for individual layouts\n`;
+            if (typeof config.padding === 'number') {
+                code += `doubleLayout.leftFrameLayout.padding(${config.padding})\n`;
+                code += `doubleLayout.rightFrameLayout.padding(${config.padding})\n`;
+            } else {
+                code += `doubleLayout.leftFrameLayout.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})\n`;
+                code += `doubleLayout.rightFrameLayout.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})\n`;
+            }
         }
 
         return code;
@@ -348,29 +409,52 @@ class FrameLayoutGenerator {
     }
 
     generateScrollStackView(views, config) {
-        let code = `let scrollStack = ScrollStackView()\n`;
+        let code = '';
 
-        // Configure properties
+        // Create views
+        code += `// Create views\n`;
+        views.forEach(view => {
+            code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
+        });
+
+        // Create and configure layout
+        code += `\n// Create and configure layout\n`;
+        code += `let scrollStack = ScrollStackView()\n`;
+
+        // Build method chain
+        const chainMethods = [];
+
         if (config.axis) {
-            code += `scrollStack.axis = .${config.axis}\n`;
+            chainMethods.push(`.axis(.${config.axis})`);
         }
 
         if (config.spacing !== undefined) {
-            code += `scrollStack.spacing = ${config.spacing}\n`;
-        }
-
-        if (config.padding) {
-            code += this.generatePadding('scrollStack', config.padding);
+            chainMethods.push(`.spacing(${config.spacing})`);
         }
 
         if (config.distribution) {
-            code += `scrollStack.distribution = .${config.distribution}\n`;
+            chainMethods.push(`.distribution(.${config.distribution})`);
         }
 
-        // Add views
-        code += `\n// Add views to scroll stack\n`;
+        if (config.padding !== undefined) {
+            if (typeof config.padding === 'number') {
+                chainMethods.push(`.padding(${config.padding})`);
+            } else {
+                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+            }
+        }
+
+        // Apply method chain if we have any configurations
+        if (chainMethods.length > 0) {
+            code += `scrollStack\n`;
+            chainMethods.forEach(method => {
+                code += `    ${method}\n`;
+            });
+        }
+
+        // Add views to layout
+        code += `\n// Add views to layout\n`;
         views.forEach(view => {
-            code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
             code += `scrollStack + ${view.name}\n`;
         });
 
@@ -378,33 +462,56 @@ class FrameLayoutGenerator {
     }
 
     generateFlowLayout(views, config) {
-        let code = `let flowLayout = FlowFrameLayout()\n`;
+        let code = '';
 
-        // Configure properties
+        // Create views
+        code += `// Create views\n`;
+        views.forEach(view => {
+            code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
+        });
+
+        // Create and configure layout
+        code += `\n// Create and configure layout\n`;
+        code += `let flowLayout = FlowFrameLayout()\n`;
+
+        // Build method chain
+        const chainMethods = [];
+
         if (config.axis) {
-            code += `flowLayout.axis = .${config.axis}\n`;
+            chainMethods.push(`.axis(.${config.axis})`);
         }
 
         if (config.interItemSpacing !== undefined) {
-            code += `flowLayout.interItemSpacing = ${config.interItemSpacing}\n`;
+            chainMethods.push(`.interItemSpacing(${config.interItemSpacing})`);
         }
 
         if (config.lineSpacing !== undefined) {
-            code += `flowLayout.lineSpacing = ${config.lineSpacing}\n`;
+            chainMethods.push(`.lineSpacing(${config.lineSpacing})`);
         }
 
         if (config.distribution) {
-            code += `flowLayout.distribution = .${config.distribution}\n`;
+            chainMethods.push(`.distribution(.${config.distribution})`);
         }
 
-        if (config.padding) {
-            code += this.generatePadding('flowLayout', config.padding);
+        if (config.padding !== undefined) {
+            if (typeof config.padding === 'number') {
+                chainMethods.push(`.padding(${config.padding})`);
+            } else {
+                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+            }
         }
 
-        // Add views
-        code += `\n// Add views to flow layout\n`;
+        // Apply method chain if we have any configurations
+        if (chainMethods.length > 0) {
+            code += `flowLayout\n`;
+            chainMethods.forEach(method => {
+                code += `    ${method}\n`;
+            });
+        }
+
+        // Add views to layout
+        code += `\n// Add views to layout\n`;
         views.forEach(view => {
-            code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
             code += `flowLayout + ${view.name}\n`;
         });
 
@@ -431,12 +538,11 @@ class FrameLayoutGenerator {
     generateViewCreation(view) {
         switch (view.type) {
             case "UILabel":
-                let labelCode = `UILabel()`;
+                let labelCode = `{\n    let label = UILabel()\n`;
                 if (view.text) {
-                    labelCode = `{\n    let label = UILabel()\n`;
                     labelCode += `    label.text = "${view.text}"\n`;
-                    labelCode += `    return label\n}()`;
                 }
+                labelCode += `    return label\n}()`;
                 return labelCode;
 
             case "UIButton":
@@ -448,13 +554,31 @@ class FrameLayoutGenerator {
                 return buttonCode;
 
             case "UIImageView":
+                let imageCode = `{\n    let imageView = UIImageView()\n`;
                 if (view.image) {
-                    return `UIImageView(image: UIImage(${view.image.startsWith('system') ? 'systemName: ' : 'named: '}"${view.image}"))`;
+                    imageCode += `    imageView.image = UIImage(${view.image.startsWith('system') ? 'systemName: ' : 'named: '}"${view.image}")\n`;
                 }
-                return `UIImageView()`;
+                imageCode += `    return imageView\n}()`;
+                return imageCode;
+
+            case "UITextField":
+                let textFieldCode = `{\n    let textField = UITextField()\n`;
+                if (view.text) {
+                    textFieldCode += `    textField.placeholder = "${view.text}"\n`;
+                }
+                textFieldCode += `    return textField\n}()`;
+                return textFieldCode;
+
+            case "UITextView":
+                let textViewCode = `{\n    let textView = UITextView()\n`;
+                if (view.text) {
+                    textViewCode += `    textView.text = "${view.text}"\n`;
+                }
+                textViewCode += `    return textView\n}()`;
+                return textViewCode;
 
             default:
-                return `${view.type}()`;
+                return `{\n    let view = ${view.type}()\n    return view\n}()`;
         }
     }
 
