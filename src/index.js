@@ -664,13 +664,19 @@ class ViewControllerGenerator {
         });
 
         // Main layout property
-        code += `    private lazy var mainLayout = ${layoutStructure.mainLayout}()\n\n`;
+        code += `    private lazy var frameLayout = ${layoutStructure.mainLayout}()\n\n`;
 
         // ViewDidLoad
         code += `    override func viewDidLoad() {\n`;
         code += `        super.viewDidLoad()\n`;
         code += `        view.backgroundColor = .systemBackground\n`;
         code += `        setupLayout()\n`;
+        code += `    }\n\n`;
+
+        // ViewDidLayoutSubviews
+        code += `    override func viewDidLayoutSubviews() {\n`;
+        code += `        super.viewDidLayoutSubviews()\n`;
+        code += `        frameLayout.frame = view.bounds\n`;
         code += `    }\n\n`;
 
         // Setup layout method
@@ -698,7 +704,7 @@ class ViewControllerGenerator {
             }
 
             if (chainMethods.length > 0) {
-                code += `        mainLayout\n`;
+                code += `        frameLayout\n`;
                 chainMethods.forEach(method => {
                     code += `            ${method}\n`;
                 });
@@ -710,16 +716,15 @@ class ViewControllerGenerator {
         code += `        // Add views to layout\n`;
         layoutStructure.views.forEach(view => {
             if (view.properties && view.properties.fixedHeight) {
-                code += `        (mainLayout + ${view.name}).fixedHeight(${view.properties.fixedHeight})\n`;
+                code += `        (frameLayout + ${view.name}).fixedHeight(${view.properties.fixedHeight})\n`;
             } else {
-                code += `        mainLayout + ${view.name}\n`;
+                code += `        frameLayout + ${view.name}\n`;
             }
         });
 
-        // Add layout to view hierarchy - ONLY using FrameLayoutKit methods
+        // Add layout to view hierarchy
         code += `\n        // Add to view hierarchy\n`;
-        code += `        view.addSubview(mainLayout)\n`;
-        code += `        mainLayout.fitToSuperview()\n`;
+        code += `        view.addSubview(frameLayout)\n`;
         code += `    }\n`;
         code += `}\n`;
 
