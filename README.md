@@ -5,41 +5,49 @@ A Model Context Protocol (MCP) server for FrameLayoutKit, providing AI-powered a
 ## Features
 
 ### 🚀 Code Generation
+
 Generate FrameLayoutKit code for all layout types:
-- **FrameLayout** - Single view container with padding and alignment
-- **VStackLayout/HStackLayout** - Vertical/horizontal stacks
-- **ZStackLayout** - Overlapping views
-- **DoubleFrameLayout** - Two-view layouts with distribution control
-- **GridFrameLayout** - Multi-row/column grid layouts
-- **ScrollStackView** - Scrollable stacks
-- **FlowFrameLayout** - Wrapping flow layouts
+
+-   **FrameLayout** - Single view container with padding and alignment
+-   **VStackLayout/HStackLayout** - Vertical/horizontal stacks
+-   **ZStackLayout** - Overlapping views
+-   **DoubleFrameLayout** - Two-view layouts with distribution control
+-   **GridFrameLayout** - Multi-row/column grid layouts
+-   **ScrollStackView** - Scrollable stacks
+-   **FlowFrameLayout** - Wrapping flow layouts
 
 ### 🔄 Auto Layout Conversion
+
 Convert existing UIKit Auto Layout code to FrameLayoutKit:
-- NSLayoutConstraint conversion
-- UIStackView migration
-- Layout anchor transformation
-- Preserves code structure and comments
+
+-   NSLayoutConstraint conversion
+-   UIStackView migration
+-   Layout anchor transformation
+-   Preserves code structure and comments
 
 ### ✅ Code Validation
+
 Validate FrameLayoutKit code for:
-- Syntax correctness
-- Semantic validity
-- Best practices
-- Performance optimization suggestions
+
+-   Syntax correctness
+-   Semantic validity
+-   Best practices
+-   Performance optimization suggestions
 
 ### 📋 Migration Assistance
+
 Generate comprehensive migration guides:
-- Project-wide analysis
-- File-by-file recommendations
-- Effort estimation
-- Step-by-step migration strategy
+
+-   Project-wide analysis
+-   File-by-file recommendations
+-   Effort estimation
+-   Step-by-step migration strategy
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/framelayoutkit-mcp-server.git
+git clone https://github.com/kennic/framelayoutkit-mcp-server.git
 cd framelayoutkit-mcp-server
 
 # Install dependencies
@@ -118,6 +126,7 @@ Add to your Continue configuration:
 ```
 
 Generated Swift code:
+
 ```swift
 let stackLayout = VStackLayout()
 stackLayout.spacing = 20
@@ -173,32 +182,37 @@ stackLayout + button
 The MCP server correctly implements FrameLayoutKit's syntax patterns:
 
 ### ✅ Operator Usage
-- `+` operator for adding views to layouts
-- `<+` and `+>` operators for DoubleFrameLayout
-- Chainable method syntax
+
+-   `+` operator for adding views to layouts
+-   `<+` and `+>` operators for DoubleFrameLayout
+-   Chainable method syntax
 
 ### ✅ Layout Properties
-- Correct alignment enums (`.top`, `.center`, `.bottom`, `.fill`, `.fit`)
-- Distribution options per layout type
-- Proper padding/spacing application
+
+-   Correct alignment enums (`.top`, `.center`, `.bottom`, `.fill`, `.fit`)
+-   Distribution options per layout type
+-   Proper padding/spacing application
 
 ### ✅ View Wrapping
-- All views automatically wrapped in FrameLayout instances
-- Individual item configuration support
-- Correct frame calculation delegation
+
+-   All views automatically wrapped in FrameLayout instances
+-   Individual item configuration support
+-   Correct frame calculation delegation
 
 ### ✅ Layout Hierarchies
-- Proper nesting of layout types
-- Correct parent-child relationships
-- Internal stack management for Grid and Flow layouts
+
+-   Proper nesting of layout types
+-   Correct parent-child relationships
+-   Internal stack management for Grid and Flow layouts
 
 ## Architecture
 
 The server is built with:
-- **Node.js** with ES modules
-- **@modelcontextprotocol/sdk** for MCP implementation
-- **Zod** for schema validation
-- Modular class structure for each tool
+
+-   **Node.js** with ES modules
+-   **@modelcontextprotocol/sdk** for MCP implementation
+-   **Zod** for schema validation
+-   Modular class structure for each tool
 
 ### Key Components
 
@@ -210,10 +224,11 @@ The server is built with:
 ## Contributing
 
 Contributions are welcome! Please ensure:
-- Code follows FrameLayoutKit's official syntax
-- All generated code is valid Swift
-- Tests cover new functionality
-- Documentation is updated
+
+-   Code follows FrameLayoutKit's official syntax
+-   All generated code is valid Swift
+-   Tests cover new functionality
+-   Documentation is updated
 
 ## License
 
@@ -222,11 +237,12 @@ MIT License - see LICENSE file for details
 ## Support
 
 For issues and questions:
-- GitHub Issues: [framelayoutkit-mcp-server/issues](https://github.com/your-org/framelayoutkit-mcp-server/issues)
-- FrameLayoutKit Documentation: [FrameLayoutKit Docs](https://github.com/kennic/FrameLayoutKit)
+
+-   GitHub Issues: [framelayoutkit-mcp-server/issues](https://github.com/kennic/framelayoutkit-mcp-server/issues)
+-   FrameLayoutKit Documentation: [FrameLayoutKit Docs](https://github.com/kennic/FrameLayoutKit)
 
 ## Acknowledgments
 
-- FrameLayoutKit by Nam Kennic
-- Anthropic's Model Context Protocol
-- The iOS development community
+-   FrameLayoutKit by Nam Kennic
+-   Anthropic's Model Context Protocol
+-   The iOS development community
