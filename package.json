@@ -1,6 +1,6 @@
 {
   "name": "@namkennic/framelayoutkit-mcp",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Model Context Protocol server for FrameLayoutKit iOS framework - generates Swift UIKit code using FrameLayoutKit syntax",
   "main": "src/index.js",
   "type": "module",
