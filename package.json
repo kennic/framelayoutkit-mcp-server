@@ -1,16 +1,21 @@
 {
-  "name": "framelayoutkit-mcp-server",
-  "version": "1.0.2",
+  "name": "@namkennic/framelayoutkit-mcp",
+  "version": "1.0.3",
   "description": "Model Context Protocol server for FrameLayoutKit iOS framework - generates Swift UIKit code using FrameLayoutKit syntax",
   "main": "src/index.js",
   "type": "module",
+  "bin": {
+    "framelayoutkit-mcp": "src/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "build": "node scripts/build.js",
     "test": "node --test test/*.test.js",
-    "lint": "eslint src/**/*.js",
-    "postinstall": "node scripts/analytics.js"
+    "lint": "eslint src/**/*.js"
   },
   "keywords": [
     "mcp",

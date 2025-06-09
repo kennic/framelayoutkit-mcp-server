@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "framelayoutkit": {
+    "command": "npx",
+    "args": [
+      "framelayoutkit-mcp"
+    ],
+    "description": "FrameLayoutKit MCP Server - generates Swift UIKit code using FrameLayoutKit syntax"
+  }
+  }
+} 

@@ -47,8 +47,8 @@ Generate comprehensive migration guides:
 
 ```bash
 # Clone the repository
-git clone https://github.com/kennic/framelayoutkit-mcp-server.git
-cd framelayoutkit-mcp-server
+git clone https://github.com/kennic/framelayoutkit-mcp.git
+cd framelayoutkit-mcp
 
 # Install dependencies
 npm install
@@ -68,7 +68,7 @@ Add to your Claude configuration file:
   "mcpServers": {
     "framelayoutkit": {
       "command": "node",
-      "args": ["/path/to/framelayoutkit-mcp-server/src/index.js"],
+      "args": ["/path/to/framelayoutkit-mcp/src/index.js"],
       "env": {}
     }
   }
@@ -88,7 +88,7 @@ Add to your Continue configuration:
     "mcpServers": [{
       "name": "framelayoutkit",
       "command": "node",
-      "args": ["./framelayoutkit-mcp-server/src/index.js"]
+      "args": ["./framelayoutkit-mcp/src/index.js"]
     }]
   }]
 }
@@ -238,7 +238,7 @@ MIT License - see LICENSE file for details
 
 For issues and questions:
 
--   GitHub Issues: [framelayoutkit-mcp-server/issues](https://github.com/kennic/framelayoutkit-mcp-server/issues)
+-   GitHub Issues: [framelayoutkit-mcp/issues](https://github.com/kennic/framelayoutkit-mcp/issues)
 -   FrameLayoutKit Documentation: [FrameLayoutKit Docs](https://github.com/kennic/FrameLayoutKit)
 
 ## Acknowledgments
