@@ -1,166 +1,199 @@
 #!/usr/bin/env node
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { execFileSync } from "child_process";
-
-// Schema definitions for FrameLayoutKit components
-const ViewTypeSchema = z.enum([
-    "UILabel", "UIButton", "UIImageView", "UITextField", "UITextView",
-    "UIView", "UIStackView", "UIScrollView", "UITableView", "UICollectionView"
-]);
-
-const AlignmentSchema = z.object({
-    vertical: z.enum(["top", "center", "bottom", "fill", "fit"]).optional(),
-    horizontal: z.enum(["left", "center", "right", "fill", "fit"]).optional()
-});
-
-const EdgeInsetsSchema = z.object({
-    top: z.number().default(0),
-    left: z.number().default(0),
-    bottom: z.number().default(0),
-    right: z.number().default(0)
-});
-
-const LayoutTypeSchema = z.enum([
-    "FrameLayout", "VStackLayout", "HStackLayout", "ZStackLayout",
-    "DoubleFrameLayout", "GridFrameLayout", "ScrollStackView", "FlowFrameLayout"
-]);
-
-const DistributionSchema = z.enum([
-    "left", "center", "right", "top", "bottom", "equal", "fill", "justified"
-]);
+import {
+    CallToolRequestSchema,
+    ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
 // Initialize MCP Server
-const server = new McpServer({
+const server = new Server({
     name: "framelayoutkit-assistant",
     version: "1.0.0",
-    description: "MCP server for FrameLayoutKit iOS framework - generates Swift UIKit code using FrameLayoutKit syntax"
+}, {
+    capabilities: {
+        tools: {}
+    }
 });
 
 // Tool: Generate FrameLayoutKit code
-server.tool("generate-framelayout",
-    {
-        layoutType: LayoutTypeSchema,
-        views: z.array(z.object({
-            name: z.string(),
-            type: ViewTypeSchema,
-            properties: z.record(z.any()).optional(),
-            text: z.string().optional(),
-            image: z.string().optional()
-        })),
-        configuration: z.object({
-            axis: z.enum(["horizontal", "vertical"]).optional(),
-            spacing: z.number().optional(),
-            padding: z.union([z.number(), EdgeInsetsSchema]).optional(),
-            distribution: DistributionSchema.optional(),
-            alignment: AlignmentSchema.optional(),
-            // Grid specific
-            rows: z.number().optional(),
-            columns: z.number().optional(),
-            // Flow specific
-            interItemSpacing: z.number().optional(),
-            lineSpacing: z.number().optional(),
-            // Double specific
-            isOverlapped: z.boolean().optional()
-        }).optional()
-    },
-    async ({ layoutType, views, configuration = {} }) => {
-        const generator = new FrameLayoutGenerator();
-        const code = generator.generateLayout(layoutType, views, configuration);
-
-        return {
-            content: [{
-                type: "text",
-                text: code,
-                metadata: {
-                    language: "swift",
-                    framework: "FrameLayoutKit"
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+        tools: [
+            {
+                name: "generate-framelayout",
+                description: "Generate FrameLayoutKit code for iOS layouts",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        layoutType: {
+                            type: "string",
+                            enum: ["FrameLayout", "VStackLayout", "HStackLayout", "ZStackLayout",
+                                "DoubleFrameLayout", "GridFrameLayout", "ScrollStackView", "FlowFrameLayout"]
+                        },
+                        views: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    name: { type: "string" },
+                                    type: {
+                                        type: "string",
+                                        enum: ["UILabel", "UIButton", "UIImageView", "UITextField", "UITextView",
+                                            "UIView", "UIStackView", "UIScrollView", "UITableView", "UICollectionView"]
+                                    },
+                                    properties: { type: "object" },
+                                    text: { type: "string" },
+                                    image: { type: "string" }
+                                },
+                                required: ["name", "type"]
+                            }
+                        },
+                        configuration: {
+                            type: "object",
+                            properties: {
+                                axis: { type: "string", enum: ["horizontal", "vertical"] },
+                                spacing: { type: "number" },
+                                padding: { type: "number" },
+                                distribution: {
+                                    type: "string",
+                                    enum: ["left", "center", "right", "top", "bottom", "equal", "fill", "justified"]
+                                },
+                                rows: { type: "number" },
+                                columns: { type: "number" },
+                                interItemSpacing: { type: "number" },
+                                lineSpacing: { type: "number" },
+                                isOverlapped: { type: "boolean" }
+                            }
+                        }
+                    },
+                    required: ["layoutType", "views"]
                 }
-            }]
-        };
-    }
-);
-
-// Tool: Convert Auto Layout to FrameLayoutKit
-server.tool("convert-autolayout",
-    {
-        swiftCode: z.string(),
-        options: z.object({
-            preserveComments: z.boolean().default(true),
-            generateHelperMethods: z.boolean().default(false),
-            useOperatorSyntax: z.boolean().default(true),
-            migrationStrategy: z.enum(["conservative", "aggressive"]).default("conservative")
-        }).optional()
-    },
-    async ({ swiftCode, options = {} }) => {
-        const converter = new AutoLayoutConverter();
-        const result = await converter.convert(swiftCode, options);
-
-        return {
-            content: [{
-                type: "text",
-                text: result.code,
-                metadata: {
-                    warnings: result.warnings,
-                    suggestions: result.suggestions,
-                    conversionStats: result.stats
+            },
+            {
+                name: "convert-autolayout",
+                description: "Convert Auto Layout code to FrameLayoutKit syntax",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        swiftCode: { type: "string" },
+                        options: {
+                            type: "object",
+                            properties: {
+                                preserveComments: { type: "boolean", default: true },
+                                generateHelperMethods: { type: "boolean", default: false },
+                                useOperatorSyntax: { type: "boolean", default: true },
+                                migrationStrategy: {
+                                    type: "string",
+                                    enum: ["conservative", "aggressive"],
+                                    default: "conservative"
+                                }
+                            }
+                        }
+                    },
+                    required: ["swiftCode"]
                 }
-            }]
-        };
-    }
-);
-
-// Tool: Validate FrameLayoutKit code
-server.tool("validate-framelayout",
-    {
-        swiftCode: z.string(),
-        checkLevel: z.enum(["syntax", "semantic", "full"]).default("full")
-    },
-    async ({ swiftCode, checkLevel }) => {
-        const validator = new FrameLayoutValidator();
-        const result = await validator.validate(swiftCode, checkLevel);
-
-        return {
-            content: [{
-                type: "text",
-                text: result.report,
-                metadata: {
-                    isValid: result.isValid,
-                    errors: result.errors,
-                    warnings: result.warnings,
-                    suggestions: result.suggestions
+            },
+            {
+                name: "validate-framelayout",
+                description: "Validate FrameLayoutKit code for syntax and semantic correctness",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        swiftCode: { type: "string" },
+                        checkLevel: {
+                            type: "string",
+                            enum: ["syntax", "semantic", "full"],
+                            default: "full"
+                        }
+                    },
+                    required: ["swiftCode"]
                 }
-            }]
-        };
-    }
-);
-
-// Tool: Generate migration guide
-server.tool("generate-migration-guide",
-    {
-        projectPath: z.string().optional(),
-        swiftFiles: z.array(z.string()).optional(),
-        outputFormat: z.enum(["markdown", "html", "json"]).default("markdown")
-    },
-    async ({ projectPath, swiftFiles, outputFormat }) => {
-        const analyzer = new MigrationAnalyzer();
-        const guide = await analyzer.analyzeMigrationPath(projectPath, swiftFiles);
-
-        return {
-            content: [{
-                type: "text",
-                text: guide.formatted[outputFormat],
-                metadata: {
-                    complexity: guide.complexity,
-                    estimatedEffort: guide.estimatedEffort,
-                    fileCount: guide.fileCount
+            },
+            {
+                name: "generate-migration-guide",
+                description: "Generate a migration guide for converting projects to FrameLayoutKit",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        projectPath: { type: "string" },
+                        swiftFiles: {
+                            type: "array",
+                            items: { type: "string" }
+                        },
+                        outputFormat: {
+                            type: "string",
+                            enum: ["markdown", "html", "json"],
+                            default: "markdown"
+                        }
+                    }
                 }
-            }]
-        };
+            }
+        ]
+    };
+});
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+
+    switch (name) {
+        case "generate-framelayout": {
+            const { layoutType, views, configuration = {} } = args;
+            const generator = new FrameLayoutGenerator();
+            const code = generator.generateLayout(layoutType, views, configuration);
+
+            return {
+                content: [{
+                    type: "text",
+                    text: code
+                }]
+            };
+        }
+
+        case "convert-autolayout": {
+            const { swiftCode, options = {} } = args;
+            const converter = new AutoLayoutConverter();
+            const result = await converter.convert(swiftCode, options);
+
+            return {
+                content: [{
+                    type: "text",
+                    text: result.code
+                }]
+            };
+        }
+
+        case "validate-framelayout": {
+            const { swiftCode, checkLevel = "full" } = args;
+            const validator = new FrameLayoutValidator();
+            const result = await validator.validate(swiftCode, checkLevel);
+
+            return {
+                content: [{
+                    type: "text",
+                    text: result.report
+                }]
+            };
+        }
+
+        case "generate-migration-guide": {
+            const { projectPath, swiftFiles, outputFormat = "markdown" } = args;
+            const analyzer = new MigrationAnalyzer();
+            const guide = await analyzer.analyzeMigrationPath(projectPath, swiftFiles);
+
+            return {
+                content: [{
+                    type: "text",
+                    text: guide.formatted[outputFormat]
+                }]
+            };
+        }
+
+        default:
+            throw new Error(`Unknown tool: ${name}`);
     }
-);
+});
 
 // Main FrameLayout code generator class
 class FrameLayoutGenerator {
@@ -826,7 +859,13 @@ class MigrationAnalyzer {
 }
 
 // Start the server
-const transport = new StdioServerTransport();
-server.connect(transport);
+async function main() {
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error("FrameLayoutKit MCP Server started successfully");
+}
 
-console.error("FrameLayoutKit MCP Server started successfully");
+main().catch(error => {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+});
