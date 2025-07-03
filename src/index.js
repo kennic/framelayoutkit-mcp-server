@@ -9,8 +9,8 @@ import {
 
 // Initialize MCP Server
 const server = new Server({
-    name: "framelayoutkit-assistant",
-    version: "1.0.0",
+    name: "framelayoutkit-mcp-server",
+    version: "1.1.1",
 }, {
     capabilities: {
         tools: {}
@@ -173,73 +173,73 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
     switch (name) {
-        case "generate-framelayout": {
-            const { layoutType, views, configuration = {} } = args;
-            const generator = new FrameLayoutGenerator();
-            const code = generator.generateLayout(layoutType, views, configuration);
+    case "generate-framelayout": {
+        const { layoutType, views, configuration = {} } = args;
+        const generator = new FrameLayoutGenerator();
+        const code = generator.generateLayout(layoutType, views, configuration);
 
-            return {
-                content: [{
-                    type: "text",
-                    text: code
-                }]
-            };
-        }
+        return {
+            content: [{
+                type: "text",
+                text: code
+            }]
+        };
+    }
 
-        case "convert-autolayout": {
-            const { swiftCode, options = {} } = args;
-            const converter = new AutoLayoutConverter();
-            const result = await converter.convert(swiftCode, options);
+    case "convert-autolayout": {
+        const { swiftCode, options = {} } = args;
+        const converter = new AutoLayoutConverter();
+        const result = await converter.convert(swiftCode, options);
 
-            return {
-                content: [{
-                    type: "text",
-                    text: result.code
-                }]
-            };
-        }
+        return {
+            content: [{
+                type: "text",
+                text: result.code
+            }]
+        };
+    }
 
-        case "validate-framelayout": {
-            const { swiftCode, checkLevel = "full" } = args;
-            const validator = new FrameLayoutValidator();
-            const result = await validator.validate(swiftCode, checkLevel);
+    case "validate-framelayout": {
+        const { swiftCode, checkLevel = "full" } = args;
+        const validator = new FrameLayoutValidator();
+        const result = await validator.validate(swiftCode, checkLevel);
 
-            return {
-                content: [{
-                    type: "text",
-                    text: result.report
-                }]
-            };
-        }
+        return {
+            content: [{
+                type: "text",
+                text: result.report
+            }]
+        };
+    }
 
-        case "generate-viewcontroller": {
-            const { className = "CustomViewController", layoutStructure } = args;
-            const generator = new ViewControllerGenerator();
-            const code = generator.generateViewController(className, layoutStructure);
+    case "generate-viewcontroller": {
+        const { className = "CustomViewController", layoutStructure } = args;
+        const generator = new ViewControllerGenerator();
+        const code = generator.generateViewController(className, layoutStructure);
 
-            return {
-                content: [{
-                    type: "text",
-                    text: code
-                }]
-            };
-        }
+        return {
+            content: [{
+                type: "text",
+                text: code
+            }]
+        };
+    }
 
-        case "generate-migration-guide": {
-            const { projectPath, swiftFiles, outputFormat = "markdown" } = args;
-            const analyzer = new MigrationAnalyzer();
-            const guide = await analyzer.analyzeMigrationPath(projectPath, swiftFiles);
+    case "generate-migration-guide": {
+        const { projectPath, swiftFiles, outputFormat = "markdown" } = args;
+        const analyzer = new MigrationAnalyzer();
+        const guide = await analyzer.analyzeMigrationPath(projectPath, swiftFiles);
 
-            return {
-                content: [{
-                    type: "text",
-                    text: guide.formatted[outputFormat]
-                }]
-            };
-        }
+        return {
+            content: [{
+                type: "text",
+                text: guide.formatted[outputFormat]
+            }]
+        };
+    }
 
-        default:
-            throw new Error(`Unknown tool: ${name}`);
+    default:
+        throw new Error(`Unknown tool: ${name}`);
     }
 });
 
@@ -247,43 +247,43 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 class FrameLayoutGenerator {
     generateLayout(layoutType, views, config) {
         switch (layoutType) {
-            case "FrameLayout":
-                return this.generateFrameLayout(views[0], config);
-            case "VStackLayout":
-                return this.generateStackLayout("VStackLayout", views, config);
-            case "HStackLayout":
-                return this.generateStackLayout("HStackLayout", views, config);
-            case "ZStackLayout":
-                return this.generateZStackLayout(views, config);
-            case "DoubleFrameLayout":
-                return this.generateDoubleFrameLayout(views, config);
-            case "GridFrameLayout":
-                return this.generateGridLayout(views, config);
-            case "ScrollStackView":
-                return this.generateScrollStackView(views, config);
-            case "FlowFrameLayout":
-                return this.generateFlowLayout(views, config);
-            default:
-                throw new Error(`Unknown layout type: ${layoutType}`);
+        case "FrameLayout":
+            return this.generateFrameLayout(views[0], config);
+        case "VStackLayout":
+            return this.generateStackLayout("VStackLayout", views, config);
+        case "HStackLayout":
+            return this.generateStackLayout("HStackLayout", views, config);
+        case "ZStackLayout":
+            return this.generateZStackLayout(views, config);
+        case "DoubleFrameLayout":
+            return this.generateDoubleFrameLayout(views, config);
+        case "GridFrameLayout":
+            return this.generateGridLayout(views, config);
+        case "ScrollStackView":
+            return this.generateScrollStackView(views, config);
+        case "FlowFrameLayout":
+            return this.generateFlowLayout(views, config);
+        default:
+            throw new Error(`Unknown layout type: ${layoutType}`);
         }
     }
 
     generateFrameLayout(view, config) {
-        let code = '';
+        let code = "";
 
         // Create view
-        code += `// Create view\n`;
+        code += "// Create view\n";
         code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
 
         // Create and configure layout
-        code += `\n// Create and configure layout\n`;
+        code += "\n// Create and configure layout\n";
         code += `let ${view.name}Layout = FrameLayout()\n`;
 
         // Build method chain
         const chainMethods = [];
 
         if (config.padding !== undefined) {
-            if (typeof config.padding === 'number') {
+            if (typeof config.padding === "number") {
                 chainMethods.push(`.padding(${config.padding})`);
             } else {
                 chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
@@ -291,7 +291,7 @@ class FrameLayoutGenerator {
         }
 
         if (config.alignment) {
-            chainMethods.push(`.align(.${config.alignment.vertical || 'center'}, .${config.alignment.horizontal || 'center'})`);
+            chainMethods.push(`.align(.${config.alignment.vertical || "center"}, .${config.alignment.horizontal || "center"})`);
         }
 
         // Apply method chain if we have any configurations
@@ -303,23 +303,23 @@ class FrameLayoutGenerator {
         }
 
         // Add view to layout
-        code += `\n// Add view to layout\n`;
+        code += "\n// Add view to layout\n";
         code += `${view.name}Layout + ${view.name}\n`;
 
         return code;
     }
 
     generateStackLayout(stackType, views, config) {
-        let code = '';
+        let code = "";
 
         // Create views section
-        code += `// Create views\n`;
+        code += "// Create views\n";
         views.forEach(view => {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
         });
 
         // Create and configure layout section
-        code += `\n// Create and configure layout\n`;
+        code += "\n// Create and configure layout\n";
         code += `let stackLayout = ${stackType}()\n`;
 
         // Build method chain
@@ -334,7 +334,7 @@ class FrameLayoutGenerator {
         }
 
         if (config.padding !== undefined) {
-            if (typeof config.padding === 'number') {
+            if (typeof config.padding === "number") {
                 chainMethods.push(`.padding(${config.padding})`);
             } else {
                 chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
@@ -343,7 +343,7 @@ class FrameLayoutGenerator {
 
         // Apply method chain if we have any configurations
         if (chainMethods.length > 0) {
-            code += `stackLayout\n`;
+            code += "stackLayout\n";
             chainMethods.forEach((method, index) => {
                 if (index === chainMethods.length - 1) {
                     code += `    ${method}\n`;
@@ -354,7 +354,7 @@ class FrameLayoutGenerator {
         }
 
         // Add views to layout
-        code += `\n// Add views to layout\n`;
+        code += "\n// Add views to layout\n";
         views.forEach(view => {
             code += `stackLayout + ${view.name}\n`;
         });
@@ -367,16 +367,16 @@ class FrameLayoutGenerator {
             throw new Error("DoubleFrameLayout requires exactly 2 views");
         }
 
-        let code = '';
+        let code = "";
 
         // Create views
-        code += `// Create views\n`;
+        code += "// Create views\n";
         code += `let ${views[0].name} = ${this.generateViewCreation(views[0])}\n`;
         code += `let ${views[1].name} = ${this.generateViewCreation(views[1])}\n`;
 
         // Create and configure layout
-        code += `\n// Create and configure layout\n`;
-        code += `let doubleLayout = DoubleFrameLayout()\n`;
+        code += "\n// Create and configure layout\n";
+        code += "let doubleLayout = DoubleFrameLayout()\n";
 
         // Build method chain
         const chainMethods = [];
@@ -394,26 +394,26 @@ class FrameLayoutGenerator {
         }
 
         if (config.isOverlapped) {
-            chainMethods.push(`.isOverlapped(true)`);
+            chainMethods.push(".isOverlapped(true)");
         }
 
         // Apply method chain if we have any configurations
         if (chainMethods.length > 0) {
-            code += `doubleLayout\n`;
+            code += "doubleLayout\n";
             chainMethods.forEach(method => {
                 code += `    ${method}\n`;
             });
         }
 
         // Add views to layout
-        code += `\n// Add views to layout\n`;
+        code += "\n// Add views to layout\n";
         code += `doubleLayout <+ ${views[0].name}\n`;
         code += `doubleLayout +> ${views[1].name}\n`;
 
         // Configure individual frame layouts if needed
         if (config.padding) {
-            code += `\n// Configure padding for individual layouts\n`;
-            if (typeof config.padding === 'number') {
+            code += "\n// Configure padding for individual layouts\n";
+            if (typeof config.padding === "number") {
                 code += `doubleLayout.leftFrameLayout.padding(${config.padding})\n`;
                 code += `doubleLayout.rightFrameLayout.padding(${config.padding})\n`;
             } else {
@@ -426,7 +426,7 @@ class FrameLayoutGenerator {
     }
 
     generateGridLayout(views, config) {
-        let code = `let gridLayout = GridFrameLayout()\n`;
+        let code = "let gridLayout = GridFrameLayout()\n";
 
         // Configure grid structure
         code += `gridLayout.rows = ${config.rows || 2}\n`;
@@ -442,32 +442,32 @@ class FrameLayoutGenerator {
         }
 
         // Create views array
-        code += `\n// Create views\n`;
-        code += `var gridViews: [UIView] = []\n`;
+        code += "\n// Create views\n";
+        code += "var gridViews: [UIView] = []\n";
 
         views.forEach(view => {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
             code += `gridViews.append(${view.name})\n`;
         });
 
-        code += `\n// Assign views to grid\n`;
-        code += `gridLayout.views = gridViews\n`;
+        code += "\n// Assign views to grid\n";
+        code += "gridLayout.views = gridViews\n";
 
         return code;
     }
 
     generateScrollStackView(views, config) {
-        let code = '';
+        let code = "";
 
         // Create views
-        code += `// Create views\n`;
+        code += "// Create views\n";
         views.forEach(view => {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
         });
 
         // Create and configure layout
-        code += `\n// Create and configure layout\n`;
-        code += `let scrollStack = ScrollStackView()\n`;
+        code += "\n// Create and configure layout\n";
+        code += "let scrollStackView = ScrollStackView()\n";
 
         // Build method chain
         const chainMethods = [];
@@ -485,7 +485,7 @@ class FrameLayoutGenerator {
         }
 
         if (config.padding !== undefined) {
-            if (typeof config.padding === 'number') {
+            if (typeof config.padding === "number") {
                 chainMethods.push(`.padding(${config.padding})`);
             } else {
                 chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
@@ -494,33 +494,33 @@ class FrameLayoutGenerator {
 
         // Apply method chain if we have any configurations
         if (chainMethods.length > 0) {
-            code += `scrollStack\n`;
+            code += "scrollStackView\n";
             chainMethods.forEach(method => {
                 code += `    ${method}\n`;
             });
         }
 
         // Add views to layout
-        code += `\n// Add views to layout\n`;
+        code += "\n// Add views to layout\n";
         views.forEach(view => {
-            code += `scrollStack + ${view.name}\n`;
+            code += `scrollStackView + ${view.name}\n`;
         });
 
         return code;
     }
 
     generateFlowLayout(views, config) {
-        let code = '';
+        let code = "";
 
         // Create views
-        code += `// Create views\n`;
+        code += "// Create views\n";
         views.forEach(view => {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
         });
 
         // Create and configure layout
-        code += `\n// Create and configure layout\n`;
-        code += `let flowLayout = FlowFrameLayout()\n`;
+        code += "\n// Create and configure layout\n";
+        code += "let flowLayout = FlowFrameLayout()\n";
 
         // Build method chain
         const chainMethods = [];
@@ -542,7 +542,7 @@ class FrameLayoutGenerator {
         }
 
         if (config.padding !== undefined) {
-            if (typeof config.padding === 'number') {
+            if (typeof config.padding === "number") {
                 chainMethods.push(`.padding(${config.padding})`);
             } else {
                 chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
@@ -551,14 +551,14 @@ class FrameLayoutGenerator {
 
         // Apply method chain if we have any configurations
         if (chainMethods.length > 0) {
-            code += `flowLayout\n`;
+            code += "flowLayout\n";
             chainMethods.forEach(method => {
                 code += `    ${method}\n`;
             });
         }
 
         // Add views to layout
-        code += `\n// Add views to layout\n`;
+        code += "\n// Add views to layout\n";
         views.forEach(view => {
             code += `flowLayout + ${view.name}\n`;
         });
@@ -567,14 +567,14 @@ class FrameLayoutGenerator {
     }
 
     generateZStackLayout(views, config) {
-        let code = `let zStackLayout = ZStackLayout()\n`;
+        let code = "let zStackLayout = ZStackLayout()\n";
 
         if (config.spacing !== undefined) {
             code += `zStackLayout.spacing = ${config.spacing}\n`;
         }
 
         // Add views (they will overlap)
-        code += `\n// Add overlapping views\n`;
+        code += "\n// Add overlapping views\n";
         views.forEach(view => {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
             code += `zStackLayout + ${view.name}\n`;
@@ -585,53 +585,58 @@ class FrameLayoutGenerator {
 
     generateViewCreation(view) {
         switch (view.type) {
-            case "UILabel":
-                let labelCode = `{\n    let label = UILabel()\n`;
-                if (view.text) {
-                    labelCode += `    label.text = "${view.text}"\n`;
-                }
-                labelCode += `    return label\n}()`;
-                return labelCode;
+        case "UILabel": {
+            let labelCode = "{\n    let label = UILabel()\n";
+            if (view.text) {
+                labelCode += `    label.text = "${view.text}"\n`;
+            }
+            labelCode += "    return label\n}()";
+            return labelCode;
+        }
 
-            case "UIButton":
-                let buttonCode = `{\n    let button = UIButton(type: .system)\n`;
-                if (view.text) {
-                    buttonCode += `    button.setTitle("${view.text}", for: .normal)\n`;
-                }
-                buttonCode += `    return button\n}()`;
-                return buttonCode;
+        case "UIButton": {
+            let buttonCode = "{\n    let button = UIButton(type: .system)\n";
+            if (view.text) {
+                buttonCode += `    button.setTitle("${view.text}", for: .normal)\n`;
+            }
+            buttonCode += "    return button\n}()";
+            return buttonCode;
+        }
 
-            case "UIImageView":
-                let imageCode = `{\n    let imageView = UIImageView()\n`;
-                if (view.image) {
-                    imageCode += `    imageView.image = UIImage(${view.image.startsWith('system') ? 'systemName: ' : 'named: '}"${view.image}")\n`;
-                }
-                imageCode += `    return imageView\n}()`;
-                return imageCode;
+        case "UIImageView": {
+            let imageCode = "{\n    let imageView = UIImageView()\n";
+            if (view.image) {
+                imageCode += `    imageView.image = UIImage(${view.image.startsWith("system") ? "systemName: " : "named: "}"${view.image}")\n`;
+            }
+            imageCode += "    return imageView\n}()";
+            return imageCode;
+        }
 
-            case "UITextField":
-                let textFieldCode = `{\n    let textField = UITextField()\n`;
-                if (view.text) {
-                    textFieldCode += `    textField.placeholder = "${view.text}"\n`;
-                }
-                textFieldCode += `    return textField\n}()`;
-                return textFieldCode;
+        case "UITextField": {
+            let textFieldCode = "{\n    let textField = UITextField()\n";
+            if (view.text) {
+                textFieldCode += `    textField.placeholder = "${view.text}"\n`;
+            }
+            textFieldCode += "    return textField\n}()";
+            return textFieldCode;
+        }
 
-            case "UITextView":
-                let textViewCode = `{\n    let textView = UITextView()\n`;
-                if (view.text) {
-                    textViewCode += `    textView.text = "${view.text}"\n`;
-                }
-                textViewCode += `    return textView\n}()`;
-                return textViewCode;
+        case "UITextView": {
+            let textViewCode = "{\n    let textView = UITextView()\n";
+            if (view.text) {
+                textViewCode += `    textView.text = "${view.text}"\n`;
+            }
+            textViewCode += "    return textView\n}()";
+            return textViewCode;
+        }
 
-            default:
-                return `{\n    let view = ${view.type}()\n    return view\n}()`;
+        default:
+            return `{\n    let view = ${view.type}()\n    return view\n}()`;
         }
     }
 
     generatePadding(layoutName, padding) {
-        if (typeof padding === 'number') {
+        if (typeof padding === "number") {
             return `${layoutName}.padding(${padding})\n`;
         } else {
             return `${layoutName}.padding(top: ${padding.top}, left: ${padding.left}, bottom: ${padding.bottom}, right: ${padding.right})\n`;
@@ -639,7 +644,7 @@ class FrameLayoutGenerator {
     }
 
     paddingValue(padding) {
-        if (typeof padding === 'number') {
+        if (typeof padding === "number") {
             return `${padding}`;
         } else {
             return `top: ${padding.top}, left: ${padding.left}, bottom: ${padding.bottom}, right: ${padding.right}`;
@@ -650,43 +655,43 @@ class FrameLayoutGenerator {
 // Complete View Controller generator
 class ViewControllerGenerator {
     generateViewController(className, layoutStructure) {
-        let code = '';
+        let code = "";
 
         // Import and class declaration
-        code += `import UIKit\n`;
-        code += `import FrameLayoutKit\n\n`;
+        code += "import UIKit\n";
+        code += "import FrameLayoutKit\n\n";
         code += `class ${className}: UIViewController {\n\n`;
 
         // Properties for views
-        code += `    // MARK: - UI Components\n`;
+        code += "    // MARK: - UI Components\n";
         layoutStructure.views.forEach(view => {
             code += `    private lazy var ${view.name} = ${this.generateLazyViewProperty(view)}\n`;
         });
 
         // Main layout property
-        code += `    private lazy var frameLayout = ${layoutStructure.mainLayout}()\n\n`;
+        code += `    private let frameLayout = ${layoutStructure.mainLayout}()\n\n`;
 
         // ViewDidLoad
-        code += `    override func viewDidLoad() {\n`;
-        code += `        super.viewDidLoad()\n`;
-        code += `        view.backgroundColor = .systemBackground\n`;
-        code += `        setupLayout()\n`;
-        code += `    }\n\n`;
+        code += "    override func viewDidLoad() {\n";
+        code += "        super.viewDidLoad()\n";
+        code += "        view.backgroundColor = .systemBackground\n";
+        code += "        setupLayout()\n";
+        code += "    }\n\n";
 
         // ViewDidLayoutSubviews
-        code += `    override func viewDidLayoutSubviews() {\n`;
-        code += `        super.viewDidLayoutSubviews()\n`;
-        code += `        frameLayout.frame = view.bounds\n`;
-        code += `    }\n\n`;
+        code += "    override func viewDidLayoutSubviews() {\n";
+        code += "        super.viewDidLayoutSubviews()\n";
+        code += "        frameLayout.frame = view.bounds\n";
+        code += "    }\n\n";
 
         // Setup layout method
-        code += `    // MARK: - Layout Setup\n`;
-        code += `    private func setupLayout() {\n`;
+        code += "    // MARK: - Layout Setup\n";
+        code += "    private func setupLayout() {\n";
 
         // Configure main layout
         if (layoutStructure.configuration) {
             const config = layoutStructure.configuration;
-            code += `        // Configure main layout\n`;
+            code += "        // Configure main layout\n";
             const chainMethods = [];
 
             if (config.spacing !== undefined) {
@@ -696,7 +701,7 @@ class ViewControllerGenerator {
                 chainMethods.push(`.distribution(.${config.distribution})`);
             }
             if (config.padding !== undefined) {
-                if (typeof config.padding === 'number') {
+                if (typeof config.padding === "number") {
                     chainMethods.push(`.padding(${config.padding})`);
                 } else {
                     chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
@@ -704,16 +709,16 @@ class ViewControllerGenerator {
             }
 
             if (chainMethods.length > 0) {
-                code += `        frameLayout\n`;
+                code += "        frameLayout\n";
                 chainMethods.forEach(method => {
                     code += `            ${method}\n`;
                 });
-                code += `\n`;
+                code += "\n";
             }
         }
 
         // Add views to layout
-        code += `        // Add views to layout\n`;
+        code += "        // Add views to layout\n";
         layoutStructure.views.forEach(view => {
             if (view.properties && view.properties.fixedHeight) {
                 code += `        (frameLayout + ${view.name}).fixedHeight(${view.properties.fixedHeight})\n`;
@@ -723,10 +728,10 @@ class ViewControllerGenerator {
         });
 
         // Add layout to view hierarchy
-        code += `\n        // Add to view hierarchy\n`;
-        code += `        view.addSubview(frameLayout)\n`;
-        code += `    }\n`;
-        code += `}\n`;
+        code += "\n        // Add to view hierarchy\n";
+        code += "        view.addSubview(frameLayout)\n";
+        code += "    }\n";
+        code += "}\n";
 
         return code;
     }
@@ -736,13 +741,13 @@ class ViewControllerGenerator {
         let viewCreation = frameLayoutGenerator.generateViewCreation(view);
 
         // Remove the outer closure and return statement for lazy property
-        viewCreation = viewCreation.replace(/^\{\s*\n/, '').replace(/\s*return \w+\s*\n\}.*$/, '');
+        viewCreation = viewCreation.replace(/^\{\s*\n/, "").replace(/\s*return \w+\s*\n\}.*$/, "");
 
         // Fix indentation for lazy property
-        const lines = viewCreation.split('\n');
+        const lines = viewCreation.split("\n");
         const indentedLines = lines.map(line => line ? `        ${line}` : line);
 
-        return `{\n${indentedLines.join('\n')}\n    }()`;
+        return `{\n${indentedLines.join("\n")}\n    }()`;
     }
 }
 
@@ -812,7 +817,7 @@ class AutoLayoutConverter {
             const suggestion = this.suggestFrameLayoutEquivalent(constraints);
             suggestions.push(suggestion);
 
-            if (options.migrationStrategy === 'aggressive') {
+            if (options.migrationStrategy === "aggressive") {
                 return suggestion.code;
             } else {
                 warnings.push(`Manual review needed for constraint conversion at: ${match.substring(0, 50)}...`);
@@ -823,7 +828,7 @@ class AutoLayoutConverter {
         return { code: convertedCode, warnings, suggestions };
     }
 
-    convertStackViews(code, options) {
+    convertStackViews(code, _options) {
         const warnings = [];
         let convertedCode = code;
 
@@ -836,32 +841,32 @@ class AutoLayoutConverter {
         });
 
         // Convert axis property
-        convertedCode = convertedCode.replace(/\.axis\s*=\s*\.horizontal/g, '.axis = .horizontal');
-        convertedCode = convertedCode.replace(/\.axis\s*=\s*\.vertical/g, '.axis = .vertical');
+        convertedCode = convertedCode.replace(/\.axis\s*=\s*\.horizontal/g, ".axis = .horizontal");
+        convertedCode = convertedCode.replace(/\.axis\s*=\s*\.vertical/g, ".axis = .vertical");
 
         // Convert distribution
-        convertedCode = convertedCode.replace(/\.distribution\s*=\s*\.fillEqually/g, '.distribution = .equal');
-        convertedCode = convertedCode.replace(/\.distribution\s*=\s*\.equalCentering/g, '.distribution = .center');
+        convertedCode = convertedCode.replace(/\.distribution\s*=\s*\.fillEqually/g, ".distribution = .equal");
+        convertedCode = convertedCode.replace(/\.distribution\s*=\s*\.equalCentering/g, ".distribution = .center");
 
         // Convert arrangedSubviews
-        convertedCode = convertedCode.replace(/(\w+)\.addArrangedSubview\((\w+)\)/g, '$1 + $2');
+        convertedCode = convertedCode.replace(/(\w+)\.addArrangedSubview\((\w+)\)/g, "$1 + $2");
 
         return { code: convertedCode, warnings };
     }
 
-    convertLayoutAnchors(code, options) {
+    convertLayoutAnchors(code, _options) {
         const suggestions = [];
-        let convertedCode = code;
+        const convertedCode = code;
 
         // Common anchor patterns
         const anchorPatterns = [
             {
                 pattern: /(\w+)\.centerXAnchor\.constraint\(equalTo:\s*(\w+)\.centerXAnchor\)/g,
-                suggestion: 'Use .align(.center, .center) in FrameLayoutKit'
+                suggestion: "Use .align(.center, .center) in FrameLayoutKit"
             },
             {
                 pattern: /(\w+)\.topAnchor\.constraint\(equalTo:\s*(\w+)\.topAnchor,\s*constant:\s*(\d+)\)/g,
-                suggestion: 'Use .padding(top: $3) in FrameLayoutKit'
+                suggestion: "Use .padding(top: $3) in FrameLayoutKit"
             }
         ];
 
@@ -870,7 +875,7 @@ class AutoLayoutConverter {
                 suggestions.push({
                     pattern: pattern.toString(),
                     suggestion,
-                    code: '// ' + suggestion
+                    code: "// " + suggestion
                 });
             }
         });
@@ -883,15 +888,15 @@ class AutoLayoutConverter {
         const hasEqualWidths = /widthAnchor.*equalTo.*widthAnchor/.test(constraints);
         const hasCenterAlignment = /centerXAnchor.*equalTo.*centerXAnchor/.test(constraints);
 
-        let suggestedLayout = '';
-        let explanation = '';
+        let suggestedLayout = "";
+        let explanation = "";
 
         if (hasEqualWidths) {
-            suggestedLayout = 'DoubleFrameLayout().distribution(.equal)';
-            explanation = 'Equal width constraints suggest using DoubleFrameLayout with .equal distribution';
+            suggestedLayout = "DoubleFrameLayout().distribution(.equal)";
+            explanation = "Equal width constraints suggest using DoubleFrameLayout with .equal distribution";
         } else if (hasCenterAlignment) {
-            suggestedLayout = 'FrameLayout().align(.center, .center)';
-            explanation = 'Center alignment constraints can be replaced with FrameLayout alignment';
+            suggestedLayout = "FrameLayout().align(.center, .center)";
+            explanation = "Center alignment constraints can be replaced with FrameLayout alignment";
         }
 
         return {
@@ -909,13 +914,13 @@ class FrameLayoutValidator {
         const suggestions = [];
 
         // Syntax validation
-        if (checkLevel === 'syntax' || checkLevel === 'full') {
+        if (checkLevel === "syntax" || checkLevel === "full") {
             const syntaxErrors = this.validateSyntax(swiftCode);
             errors.push(...syntaxErrors);
         }
 
         // Semantic validation
-        if (checkLevel === 'semantic' || checkLevel === 'full') {
+        if (checkLevel === "semantic" || checkLevel === "full") {
             const semanticIssues = this.validateSemantics(swiftCode);
             warnings.push(...semanticIssues.warnings);
             suggestions.push(...semanticIssues.suggestions);
@@ -940,23 +945,23 @@ class FrameLayoutValidator {
         const autoLayoutChecks = [
             {
                 pattern: /NSLayoutConstraint/,
-                error: 'CRITICAL ERROR: NSLayoutConstraint detected! FrameLayoutKit should NEVER use AutoLayout constraints.'
+                error: "CRITICAL ERROR: NSLayoutConstraint detected! FrameLayoutKit should NEVER use AutoLayout constraints."
             },
             {
                 pattern: /\.constraint\(/,
-                error: 'CRITICAL ERROR: AutoLayout constraint method detected! Use FrameLayoutKit methods instead.'
+                error: "CRITICAL ERROR: AutoLayout constraint method detected! Use FrameLayoutKit methods instead."
             },
             {
                 pattern: /translatesAutoresizingMaskIntoConstraints/,
-                error: 'CRITICAL ERROR: AutoLayout mask constraint detected! FrameLayoutKit handles layout automatically.'
+                error: "CRITICAL ERROR: AutoLayout mask constraint detected! FrameLayoutKit handles layout automatically."
             },
             {
                 pattern: /\.activate\(\[/,
-                error: 'CRITICAL ERROR: NSLayoutConstraint.activate detected! Use FrameLayoutKit operators instead.'
+                error: "CRITICAL ERROR: NSLayoutConstraint.activate detected! Use FrameLayoutKit operators instead."
             },
             {
                 pattern: /\.(topAnchor|bottomAnchor|leadingAnchor|trailingAnchor|centerXAnchor|centerYAnchor)/,
-                error: 'CRITICAL ERROR: AutoLayout anchors detected! Use FrameLayoutKit alignment methods instead.'
+                error: "CRITICAL ERROR: AutoLayout anchors detected! Use FrameLayoutKit alignment methods instead."
             }
         ];
 
@@ -970,15 +975,15 @@ class FrameLayoutValidator {
         const frameLaoutSyntaxChecks = [
             {
                 pattern: /\.centerLayout\(\)/,
-                error: 'SYNTAX ERROR: .centerLayout() does not exist. Use (layout + view).aligns(.center, .center) instead.'
+                error: "SYNTAX ERROR: .centerLayout() does not exist. Use (layout + view).aligns(.center, .center) instead."
             },
             {
                 pattern: /\.frameLayout\(height:/,
-                error: 'SYNTAX ERROR: .frameLayout(height:) is incorrect. Use (layout + view).fixedHeight() instead.'
+                error: "SYNTAX ERROR: .frameLayout(height:) is incorrect. Use (layout + view).fixedHeight() instead."
             },
             {
                 pattern: /\.frameLayout\(width:/,
-                error: 'SYNTAX ERROR: .frameLayout(width:) is incorrect. Use (layout + view).fixedWidth() instead.'
+                error: "SYNTAX ERROR: .frameLayout(width:) is incorrect. Use (layout + view).fixedWidth() instead."
             }
         ];
 
@@ -992,15 +997,15 @@ class FrameLayoutValidator {
         const syntaxChecks = [
             {
                 pattern: /\+\s*\+/,
-                error: 'Double + operator detected. Each + should have a view on both sides.'
+                error: "Double + operator detected. Each + should have a view on both sides."
             },
             {
                 pattern: /<\+.*<\+/,
-                error: 'Multiple <+ operators. DoubleFrameLayout can only have one left view.'
+                error: "Multiple <+ operators. DoubleFrameLayout can only have one left view."
             },
             {
                 pattern: /\+>.*\+>/,
-                error: 'Multiple +> operators. DoubleFrameLayout can only have one right view.'
+                error: "Multiple +> operators. DoubleFrameLayout can only have one right view."
             }
         ];
 
@@ -1028,19 +1033,19 @@ class FrameLayoutValidator {
 
         // Check for semantic issues
         if (/GridFrameLayout.*views\s*=\s*\[\]/.test(code)) {
-            warnings.push('GridFrameLayout has empty views array');
+            warnings.push("GridFrameLayout has empty views array");
         }
 
         if (/DoubleFrameLayout.*\n.*\+\s*\w+\s*\n.*\+\s*\w+\s*\n.*\+\s*\w+/.test(code)) {
-            warnings.push('DoubleFrameLayout should only contain 2 views, but more were added');
+            warnings.push("DoubleFrameLayout should only contain 2 views, but more were added");
         }
 
         if (/distribution\s*=\s*\.justified.*isJustified\s*=\s*false/.test(code)) {
-            suggestions.push('When using .justified distribution, consider setting isJustified = true');
+            suggestions.push("When using .justified distribution, consider setting isJustified = true");
         }
 
         if (/ScrollStackView.*axis\s*=\s*\.horizontal.*frame\.height\s*=\s*\d{3,}/.test(code)) {
-            suggestions.push('Horizontal ScrollStackView has large height. Consider reducing for better UX.');
+            suggestions.push("Horizontal ScrollStackView has large height. Consider reducing for better UX.");
         }
 
         return { warnings, suggestions };
@@ -1049,14 +1054,14 @@ class FrameLayoutValidator {
     isValidChainMethod(chain) {
         const validMethods = [
             // Layout configuration methods
-            'padding', 'align', 'aligns', 'spacing', 'distribution', 'axis',
+            "padding", "align", "aligns", "spacing", "distribution", "axis",
             // Size methods
-            'fixedSize', 'fixedWidth', 'fixedHeight', 'minSize', 'maxSize',
-            'flexible', 'flexibleWidth', 'flexibleHeight',
+            "fixedSize", "fixedWidth", "fixedHeight", "minSize", "maxSize",
+            "flexible", "flexibleWidth", "flexibleHeight",
             // Grid layout methods
-            'rows', 'columns', 'interItemSpacing', 'lineSpacing',
+            "rows", "columns", "interItemSpacing", "lineSpacing",
             // Utility methods
-            'debug', 'isOverlapped', 'fitToSuperview'
+            "debug", "isOverlapped", "fitToSuperview"
         ];
 
         const methodMatch = chain.match(/\.(\w+)\(/);
@@ -1068,16 +1073,16 @@ class FrameLayoutValidator {
     }
 
     generateValidationReport(errors, warnings, suggestions) {
-        let report = '# FrameLayoutKit Validation Report\n\n';
+        let report = "# FrameLayoutKit Validation Report\n\n";
 
         if (errors.length === 0) {
-            report += '✅ **No syntax errors found**\n\n';
+            report += "✅ **No syntax errors found**\n\n";
         } else {
             report += `❌ **${errors.length} Errors Found:**\n\n`;
             errors.forEach((error, index) => {
                 report += `${index + 1}. ${error}\n`;
             });
-            report += '\n';
+            report += "\n";
         }
 
         if (warnings.length > 0) {
@@ -1085,7 +1090,7 @@ class FrameLayoutValidator {
             warnings.forEach((warning, index) => {
                 report += `${index + 1}. ${warning}\n`;
             });
-            report += '\n';
+            report += "\n";
         }
 
         if (suggestions.length > 0) {
@@ -1103,8 +1108,8 @@ class FrameLayoutValidator {
 class MigrationAnalyzer {
     async analyzeMigrationPath(projectPath, swiftFiles) {
         const analysis = {
-            complexity: 'medium',
-            estimatedEffort: '2-3 weeks',
+            complexity: "medium",
+            estimatedEffort: "2-3 weeks",
             fileCount: 0,
             recommendations: [],
             formatted: {}
@@ -1114,13 +1119,13 @@ class MigrationAnalyzer {
         if (projectPath) {
             // Would analyze entire project
             analysis.fileCount = 50; // Example
-            analysis.recommendations.push('Start with view controllers that use simple layouts');
-            analysis.recommendations.push('Migrate UIStackView usage first as it maps well to StackFrameLayout');
+            analysis.recommendations.push("Start with view controllers that use simple layouts");
+            analysis.recommendations.push("Migrate UIStackView usage first as it maps well to StackFrameLayout");
         } else if (swiftFiles) {
             analysis.fileCount = swiftFiles.length;
             // Analyze each file
             swiftFiles.forEach(file => {
-                if (file.includes('ViewController')) {
+                if (file.includes("ViewController")) {
                     analysis.recommendations.push(`${file}: Good candidate for migration`);
                 }
             });
@@ -1135,27 +1140,27 @@ class MigrationAnalyzer {
     }
 
     generateMarkdownGuide(analysis) {
-        let guide = '# FrameLayoutKit Migration Guide\n\n';
-        guide += `## Project Overview\n\n`;
+        let guide = "# FrameLayoutKit Migration Guide\n\n";
+        guide += "## Project Overview\n\n";
         guide += `- **Files to migrate:** ${analysis.fileCount}\n`;
         guide += `- **Complexity:** ${analysis.complexity}\n`;
         guide += `- **Estimated effort:** ${analysis.estimatedEffort}\n\n`;
 
-        guide += `## Migration Strategy\n\n`;
-        guide += `### Phase 1: Preparation\n`;
-        guide += `1. Add FrameLayoutKit to your project\n`;
-        guide += `2. Create a feature branch for migration\n`;
-        guide += `3. Set up the MCP server for assistance\n\n`;
+        guide += "## Migration Strategy\n\n";
+        guide += "### Phase 1: Preparation\n";
+        guide += "1. Add FrameLayoutKit to your project\n";
+        guide += "2. Create a feature branch for migration\n";
+        guide += "3. Set up the MCP server for assistance\n\n";
 
-        guide += `### Phase 2: Migration\n`;
+        guide += "### Phase 2: Migration\n";
         analysis.recommendations.forEach((rec, index) => {
             guide += `${index + 1}. ${rec}\n`;
         });
 
-        guide += `\n### Phase 3: Testing\n`;
-        guide += `1. Visual regression testing\n`;
-        guide += `2. Performance benchmarking\n`;
-        guide += `3. User acceptance testing\n`;
+        guide += "\n### Phase 3: Testing\n";
+        guide += "1. Visual regression testing\n";
+        guide += "2. Performance benchmarking\n";
+        guide += "3. User acceptance testing\n";
 
         return guide;
     }
@@ -1181,7 +1186,7 @@ class MigrationAnalyzer {
     </div>
     <h2>Recommendations</h2>
     <ul>
-        ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('\n        ')}
+        ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join("\n        ")}
     </ul>
 </body>
 </html>`;
