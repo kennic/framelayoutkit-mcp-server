@@ -10,7 +10,7 @@ import {
 // Initialize MCP Server
 const server = new Server({
     name: "framelayoutkit-mcp-server",
-    version: "1.1.1",
+    version: "1.2.0",
 }, {
     capabilities: {
         tools: {}
@@ -275,36 +275,72 @@ class FrameLayoutGenerator {
         code += "// Create view\n";
         code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
 
-        // Create and configure layout
-        code += "\n// Create and configure layout\n";
-        code += `let ${view.name}Layout = FrameLayout()\n`;
+        // Create layout with chainable DSL syntax
+        code += "\n// Create layout with chainable DSL\n";
+        code += `let ${view.name}Layout = FrameLayout {\n`;
+        
+        // Add view with individual configuration inside closure
+        let viewConfig = "";
+        
+        // Check for individual view properties
+        if (view.properties) {
+            const viewChainMethods = [];
+            
+            if (view.properties.padding !== undefined) {
+                if (typeof view.properties.padding === "number") {
+                    viewChainMethods.push(`padding(${view.properties.padding})`);
+                } else {
+                    viewChainMethods.push(`padding(top: ${view.properties.padding.top}, left: ${view.properties.padding.left}, bottom: ${view.properties.padding.bottom}, right: ${view.properties.padding.right})`);
+                }
+            }
+            
+            if (view.properties.fixedHeight !== undefined) {
+                viewChainMethods.push(`fixedHeight(${view.properties.fixedHeight})`);
+            }
+            
+            if (view.properties.fixedWidth !== undefined) {
+                viewChainMethods.push(`fixedWidth(${view.properties.fixedWidth})`);
+            }
+            
+            if (view.properties.flexible !== undefined) {
+                viewChainMethods.push(`flexible(${view.properties.flexible})`);
+            }
+            
+            if (view.properties.alignment) {
+                viewChainMethods.push(`aligns(.${view.properties.alignment.vertical || "center"}, .${view.properties.alignment.horizontal || "center"})`);
+            }
+            
+            if (viewChainMethods.length > 0) {
+                viewConfig = "." + viewChainMethods.join(".");
+            }
+        }
+        
+        code += `    $0 + ${view.name}${viewConfig}\n`;
+        code += "}";
 
-        // Build method chain
+        // Build layout configuration chain
         const chainMethods = [];
 
         if (config.padding !== undefined) {
             if (typeof config.padding === "number") {
-                chainMethods.push(`.padding(${config.padding})`);
+                chainMethods.push(`padding(${config.padding})`);
             } else {
-                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+                chainMethods.push(`padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
             }
         }
 
         if (config.alignment) {
-            chainMethods.push(`.align(.${config.alignment.vertical || "center"}, .${config.alignment.horizontal || "center"})`);
+            chainMethods.push(`aligns(.${config.alignment.vertical || "center"}, .${config.alignment.horizontal || "center"})`);
         }
 
-        // Apply method chain if we have any configurations
+        if (config.fitToSuperview !== undefined && config.fitToSuperview) {
+            chainMethods.push("fitToSuperview()");
+        }
+
+        // Apply layout configuration chain
         if (chainMethods.length > 0) {
-            code += `${view.name}Layout\n`;
-            chainMethods.forEach(method => {
-                code += `    ${method}\n`;
-            });
+            code += "." + chainMethods.join(".");
         }
-
-        // Add view to layout
-        code += "\n// Add view to layout\n";
-        code += `${view.name}Layout + ${view.name}\n`;
 
         return code;
     }
@@ -318,46 +354,87 @@ class FrameLayoutGenerator {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
         });
 
-        // Create and configure layout section
-        code += "\n// Create and configure layout\n";
-        code += `let stackLayout = ${stackType}()\n`;
+        // Create layout with chainable DSL syntax
+        code += "\n// Create layout with chainable DSL\n";
+        code += `let stackLayout = ${stackType} {\n`;
 
-        // Build method chain
+        // Add views with individual configurations inside closure
+        views.forEach(view => {
+            let viewConfig = "";
+            
+            // Check for individual view properties
+            if (view.properties) {
+                const viewChainMethods = [];
+                
+                if (view.properties.padding !== undefined) {
+                    if (typeof view.properties.padding === "number") {
+                        viewChainMethods.push(`padding(${view.properties.padding})`);
+                    } else {
+                        viewChainMethods.push(`padding(top: ${view.properties.padding.top}, left: ${view.properties.padding.left}, bottom: ${view.properties.padding.bottom}, right: ${view.properties.padding.right})`);
+                    }
+                }
+                
+                if (view.properties.fixedHeight !== undefined) {
+                    viewChainMethods.push(`fixedHeight(${view.properties.fixedHeight})`);
+                }
+                
+                if (view.properties.fixedWidth !== undefined) {
+                    viewChainMethods.push(`fixedWidth(${view.properties.fixedWidth})`);
+                }
+                
+                if (view.properties.fixedContentHeight !== undefined) {
+                    viewChainMethods.push(`fixedContentHeight(${view.properties.fixedContentHeight})`);
+                }
+                
+                if (view.properties.fixedContentWidth !== undefined) {
+                    viewChainMethods.push(`fixedContentWidth(${view.properties.fixedContentWidth})`);
+                }
+                
+                if (view.properties.flexible !== undefined) {
+                    viewChainMethods.push(`flexible(${view.properties.flexible})`);
+                }
+                
+                if (view.properties.alignment) {
+                    viewChainMethods.push(`aligns(.${view.properties.alignment.vertical || "center"}, .${view.properties.alignment.horizontal || "center"})`);
+                }
+                
+                if (viewChainMethods.length > 0) {
+                    viewConfig = "." + viewChainMethods.join(".");
+                }
+            }
+            
+            code += `    ($0 + ${view.name})${viewConfig}\n`;
+        });
+
+        code += "}";
+
+        // Build layout configuration chain
         const chainMethods = [];
 
-        if (config.distribution) {
-            chainMethods.push(`.distribution(.${config.distribution})`);
+        if (config.spacing !== undefined) {
+            chainMethods.push(`spacing(${config.spacing})`);
         }
 
-        if (config.spacing !== undefined) {
-            chainMethods.push(`.spacing(${config.spacing})`);
+        if (config.distribution) {
+            chainMethods.push(`distribution(.${config.distribution})`);
         }
 
         if (config.padding !== undefined) {
             if (typeof config.padding === "number") {
-                chainMethods.push(`.padding(${config.padding})`);
+                chainMethods.push(`padding(${config.padding})`);
             } else {
-                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+                chainMethods.push(`padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
             }
         }
 
-        // Apply method chain if we have any configurations
-        if (chainMethods.length > 0) {
-            code += "stackLayout\n";
-            chainMethods.forEach((method, index) => {
-                if (index === chainMethods.length - 1) {
-                    code += `    ${method}\n`;
-                } else {
-                    code += `    ${method}\n`;
-                }
-            });
+        if (config.alignment) {
+            chainMethods.push(`aligns(.${config.alignment.vertical || "center"}, .${config.alignment.horizontal || "center"})`);
         }
 
-        // Add views to layout
-        code += "\n// Add views to layout\n";
-        views.forEach(view => {
-            code += `stackLayout + ${view.name}\n`;
-        });
+        // Apply layout configuration chain
+        if (chainMethods.length > 0) {
+            code += "." + chainMethods.join(".");
+        }
 
         return code;
     }
@@ -465,46 +542,79 @@ class FrameLayoutGenerator {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
         });
 
-        // Create and configure layout
-        code += "\n// Create and configure layout\n";
-        code += "let scrollStackView = ScrollStackView()\n";
+        // Create layout with chainable DSL syntax
+        code += "\n// Create layout with chainable DSL\n";
+        code += "let scrollStackView = ScrollStackView {\n";
 
-        // Build method chain
+        // Add views with individual configurations inside closure
+        views.forEach(view => {
+            let viewConfig = "";
+            
+            // Check for individual view properties
+            if (view.properties) {
+                const viewChainMethods = [];
+                
+                if (view.properties.padding !== undefined) {
+                    if (typeof view.properties.padding === "number") {
+                        viewChainMethods.push(`padding(${view.properties.padding})`);
+                    } else {
+                        viewChainMethods.push(`padding(top: ${view.properties.padding.top}, left: ${view.properties.padding.left}, bottom: ${view.properties.padding.bottom}, right: ${view.properties.padding.right})`);
+                    }
+                }
+                
+                if (view.properties.fixedHeight !== undefined) {
+                    viewChainMethods.push(`fixedHeight(${view.properties.fixedHeight})`);
+                }
+                
+                if (view.properties.fixedWidth !== undefined) {
+                    viewChainMethods.push(`fixedWidth(${view.properties.fixedWidth})`);
+                }
+                
+                if (view.properties.flexible !== undefined) {
+                    viewChainMethods.push(`flexible(${view.properties.flexible})`);
+                }
+                
+                if (view.properties.alignment) {
+                    viewChainMethods.push(`aligns(.${view.properties.alignment.vertical || "center"}, .${view.properties.alignment.horizontal || "center"})`);
+                }
+                
+                if (viewChainMethods.length > 0) {
+                    viewConfig = "." + viewChainMethods.join(".");
+                }
+            }
+            
+            code += `    ($0 + ${view.name})${viewConfig}\n`;
+        });
+
+        code += "}";
+
+        // Build layout configuration chain
         const chainMethods = [];
 
         if (config.axis) {
-            chainMethods.push(`.axis(.${config.axis})`);
+            chainMethods.push(`axis(.${config.axis})`);
         }
 
         if (config.spacing !== undefined) {
-            chainMethods.push(`.spacing(${config.spacing})`);
+            chainMethods.push(`spacing(${config.spacing})`);
         }
 
         if (config.distribution) {
-            chainMethods.push(`.distribution(.${config.distribution})`);
+            chainMethods.push(`distribution(.${config.distribution})`);
         }
 
         if (config.padding !== undefined) {
             if (typeof config.padding === "number") {
-                chainMethods.push(`.padding(${config.padding})`);
+                chainMethods.push(`padding(${config.padding})`);
             } else {
-                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+                chainMethods.push(`padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
             }
         }
 
-        // Apply method chain if we have any configurations
+        // Apply layout configuration chain
         if (chainMethods.length > 0) {
-            code += "scrollStackView\n";
-            chainMethods.forEach(method => {
-                code += `    ${method}\n`;
-            });
+            code += "." + chainMethods.join(".");
         }
-
-        // Add views to layout
-        code += "\n// Add views to layout\n";
-        views.forEach(view => {
-            code += `scrollStackView + ${view.name}\n`;
-        });
 
         return code;
     }
@@ -518,50 +628,91 @@ class FrameLayoutGenerator {
             code += `let ${view.name} = ${this.generateViewCreation(view)}\n`;
         });
 
-        // Create and configure layout
-        code += "\n// Create and configure layout\n";
-        code += "let flowLayout = FlowFrameLayout()\n";
+        // Create layout with chainable DSL syntax
+        code += "\n// Create layout with chainable DSL\n";
+        code += "let flowLayout = FlowFrameLayout {\n";
 
-        // Build method chain
+        // Add views with individual configurations inside closure
+        views.forEach(view => {
+            let viewConfig = "";
+            
+            // Check for individual view properties
+            if (view.properties) {
+                const viewChainMethods = [];
+                
+                if (view.properties.padding !== undefined) {
+                    if (typeof view.properties.padding === "number") {
+                        viewChainMethods.push(`padding(${view.properties.padding})`);
+                    } else {
+                        viewChainMethods.push(`padding(top: ${view.properties.padding.top}, left: ${view.properties.padding.left}, bottom: ${view.properties.padding.bottom}, right: ${view.properties.padding.right})`);
+                    }
+                }
+                
+                if (view.properties.fixedHeight !== undefined) {
+                    viewChainMethods.push(`fixedHeight(${view.properties.fixedHeight})`);
+                }
+                
+                if (view.properties.fixedWidth !== undefined) {
+                    viewChainMethods.push(`fixedWidth(${view.properties.fixedWidth})`);
+                }
+                
+                if (view.properties.fixedContentHeight !== undefined) {
+                    viewChainMethods.push(`fixedContentHeight(${view.properties.fixedContentHeight})`);
+                }
+                
+                if (view.properties.fixedContentWidth !== undefined) {
+                    viewChainMethods.push(`fixedContentWidth(${view.properties.fixedContentWidth})`);
+                }
+                
+                if (view.properties.flexible !== undefined) {
+                    viewChainMethods.push(`flexible(${view.properties.flexible})`);
+                }
+                
+                if (view.properties.alignment) {
+                    viewChainMethods.push(`aligns(.${view.properties.alignment.vertical || "center"}, .${view.properties.alignment.horizontal || "center"})`);
+                }
+                
+                if (viewChainMethods.length > 0) {
+                    viewConfig = "." + viewChainMethods.join(".");
+                }
+            }
+            
+            code += `    ($0 + ${view.name})${viewConfig}\n`;
+        });
+
+        code += "}";
+
+        // Build layout configuration chain
         const chainMethods = [];
 
         if (config.axis) {
-            chainMethods.push(`.axis(.${config.axis})`);
+            chainMethods.push(`axis(.${config.axis})`);
         }
 
         if (config.interItemSpacing !== undefined) {
-            chainMethods.push(`.interItemSpacing(${config.interItemSpacing})`);
+            chainMethods.push(`interItemSpacing(${config.interItemSpacing})`);
         }
 
         if (config.lineSpacing !== undefined) {
-            chainMethods.push(`.lineSpacing(${config.lineSpacing})`);
+            chainMethods.push(`lineSpacing(${config.lineSpacing})`);
         }
 
         if (config.distribution) {
-            chainMethods.push(`.distribution(.${config.distribution})`);
+            chainMethods.push(`distribution(.${config.distribution})`);
         }
 
         if (config.padding !== undefined) {
             if (typeof config.padding === "number") {
-                chainMethods.push(`.padding(${config.padding})`);
+                chainMethods.push(`padding(${config.padding})`);
             } else {
-                chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+                chainMethods.push(`padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
             }
         }
 
-        // Apply method chain if we have any configurations
+        // Apply layout configuration chain
         if (chainMethods.length > 0) {
-            code += "flowLayout\n";
-            chainMethods.forEach(method => {
-                code += `    ${method}\n`;
-            });
+            code += "." + chainMethods.join(".");
         }
-
-        // Add views to layout
-        code += "\n// Add views to layout\n";
-        views.forEach(view => {
-            code += `flowLayout + ${view.name}\n`;
-        });
 
         return code;
     }
@@ -668,8 +819,85 @@ class ViewControllerGenerator {
             code += `    private lazy var ${view.name} = ${this.generateLazyViewProperty(view)}\n`;
         });
 
-        // Main layout property
-        code += `    private let frameLayout = ${layoutStructure.mainLayout}()\n\n`;
+        // Main layout property with chainable DSL
+        code += `    private lazy var frameLayout = ${layoutStructure.mainLayout} {\n`;
+        
+        // Add views with individual configurations inside closure
+        layoutStructure.views.forEach(view => {
+            let viewConfig = "";
+            
+            // Check for individual view properties
+            if (view.properties) {
+                const viewChainMethods = [];
+                
+                if (view.properties.padding !== undefined) {
+                    if (typeof view.properties.padding === "number") {
+                        viewChainMethods.push(`padding(${view.properties.padding})`);
+                    } else {
+                        viewChainMethods.push(`padding(top: ${view.properties.padding.top}, left: ${view.properties.padding.left}, bottom: ${view.properties.padding.bottom}, right: ${view.properties.padding.right})`);
+                    }
+                }
+                
+                if (view.properties.fixedHeight !== undefined) {
+                    viewChainMethods.push(`fixedHeight(${view.properties.fixedHeight})`);
+                }
+                
+                if (view.properties.fixedWidth !== undefined) {
+                    viewChainMethods.push(`fixedWidth(${view.properties.fixedWidth})`);
+                }
+                
+                if (view.properties.fixedContentHeight !== undefined) {
+                    viewChainMethods.push(`fixedContentHeight(${view.properties.fixedContentHeight})`);
+                }
+                
+                if (view.properties.flexible !== undefined) {
+                    viewChainMethods.push(`flexible(${view.properties.flexible})`);
+                }
+                
+                if (view.properties.alignment) {
+                    viewChainMethods.push(`aligns(.${view.properties.alignment.vertical || "center"}, .${view.properties.alignment.horizontal || "center"})`);
+                }
+                
+                if (viewChainMethods.length > 0) {
+                    viewConfig = "." + viewChainMethods.join(".");
+                }
+            }
+            
+            code += `        ($0 + ${view.name})${viewConfig}\n`;
+        });
+
+        code += "    }";
+
+        // Build layout configuration chain
+        const chainMethods = [];
+
+        if (layoutStructure.configuration) {
+            const config = layoutStructure.configuration;
+            
+            if (config.spacing !== undefined) {
+                chainMethods.push(`spacing(${config.spacing})`);
+            }
+            if (config.distribution) {
+                chainMethods.push(`distribution(.${config.distribution})`);
+            }
+            if (config.padding !== undefined) {
+                if (typeof config.padding === "number") {
+                    chainMethods.push(`padding(${config.padding})`);
+                } else {
+                    chainMethods.push(`padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
+                }
+            }
+            if (config.alignment) {
+                chainMethods.push(`aligns(.${config.alignment.vertical || "center"}, .${config.alignment.horizontal || "center"})`);
+            }
+        }
+
+        // Apply layout configuration chain
+        if (chainMethods.length > 0) {
+            code += "." + chainMethods.join(".");
+        }
+        
+        code += "\n\n";
 
         // ViewDidLoad
         code += "    override func viewDidLoad() {\n";
@@ -687,48 +915,7 @@ class ViewControllerGenerator {
         // Setup layout method
         code += "    // MARK: - Layout Setup\n";
         code += "    private func setupLayout() {\n";
-
-        // Configure main layout
-        if (layoutStructure.configuration) {
-            const config = layoutStructure.configuration;
-            code += "        // Configure main layout\n";
-            const chainMethods = [];
-
-            if (config.spacing !== undefined) {
-                chainMethods.push(`.spacing(${config.spacing})`);
-            }
-            if (config.distribution) {
-                chainMethods.push(`.distribution(.${config.distribution})`);
-            }
-            if (config.padding !== undefined) {
-                if (typeof config.padding === "number") {
-                    chainMethods.push(`.padding(${config.padding})`);
-                } else {
-                    chainMethods.push(`.padding(top: ${config.padding.top}, left: ${config.padding.left}, bottom: ${config.padding.bottom}, right: ${config.padding.right})`);
-                }
-            }
-
-            if (chainMethods.length > 0) {
-                code += "        frameLayout\n";
-                chainMethods.forEach(method => {
-                    code += `            ${method}\n`;
-                });
-                code += "\n";
-            }
-        }
-
-        // Add views to layout
-        code += "        // Add views to layout\n";
-        layoutStructure.views.forEach(view => {
-            if (view.properties && view.properties.fixedHeight) {
-                code += `        (frameLayout + ${view.name}).fixedHeight(${view.properties.fixedHeight})\n`;
-            } else {
-                code += `        frameLayout + ${view.name}\n`;
-            }
-        });
-
-        // Add layout to view hierarchy
-        code += "\n        // Add to view hierarchy\n";
+        code += "        // Add layout to view hierarchy\n";
         code += "        view.addSubview(frameLayout)\n";
         code += "    }\n";
         code += "}\n";
@@ -1204,3 +1391,6 @@ main().catch(error => {
     console.error("Failed to start server:", error);
     process.exit(1);
 });
+
+// Export classes for testing
+export { FrameLayoutGenerator, ViewControllerGenerator, AutoLayoutConverter, FrameLayoutValidator, MigrationAnalyzer };
