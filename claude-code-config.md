@@ -1,14 +1,16 @@
-# Cách sử dụng FrameLayoutKit MCP Server trong Claude Code
+# How to use FrameLayoutKit MCP Server in Claude Code
 
-## Cách 1: Cấu hình Local (Sau khi publish)
+## Method 1: Local Configuration (After publishing)
 
-### 1. Cài đặt package:
+### 1. Install the package:
+
 ```bash
 npm install -g framelayoutkit-mcp-server
 ```
 
-### 2. Tạo file cấu hình Claude Code:
-Tạo file `~/.claude/mcp_settings.json`:
+### 2. Create Claude Code configuration file:
+
+Create the file `~/.claude/mcp_settings.json`:
 
 ```json
 {
@@ -21,15 +23,17 @@ Tạo file `~/.claude/mcp_settings.json`:
 }
 ```
 
-## Cách 2: Cấu hình Development (Hiện tại)
+## Method 2: Development Configuration (Current)
 
-### 1. Trong thư mục project này:
+### 1. In this project directory:
+
 ```bash
-# Chạy server local
+# Run local server
 npm start
 ```
 
-### 2. Cấu hình Claude Code với path local:
+### 2. Configure Claude Code with local path:
+
 ```json
 {
   "mcpServers": {
@@ -42,9 +46,9 @@ npm start
 }
 ```
 
-## Cách 3: Cấu hình trong IDE (Cursor)
+## Method 3: IDE Configuration (Cursor)
 
-Đã có sẵn file `.cursor/mcp.json` - cần cập nhật:
+The `.cursor/mcp.json` file already exists - needs to be updated:
 
 ```json
 {
@@ -60,33 +64,38 @@ npm start
 }
 ```
 
-## Sử dụng trong Claude Code
+## Usage in Claude Code
 
-Sau khi cấu hình, bạn có thể sử dụng các tools:
+After configuration, you can use the tools:
 
 ### 1. Generate FrameLayoutKit Code:
+
 ```
 Generate a VStackLayout with a label and button using FrameLayoutKit
 ```
 
 ### 2. Convert AutoLayout to FrameLayoutKit:
+
 ```
 Convert this AutoLayout code to FrameLayoutKit:
 [paste your AutoLayout code]
 ```
 
 ### 3. Validate FrameLayoutKit Code:
+
 ```
 Validate this FrameLayoutKit code:
 [paste your FrameLayoutKit code]
 ```
 
 ### 4. Generate View Controller:
+
 ```
 Generate a view controller with login form using FrameLayoutKit
 ```
 
 ### 5. Generate Migration Guide:
+
 ```
 Create a migration guide for converting my iOS project to FrameLayoutKit
 ```
@@ -101,7 +110,7 @@ Create a migration guide for converting my iOS project to FrameLayoutKit
 
 ## Example Output:
 
-Với chainable DSL syntax mới, output sẽ như:
+With the new chainable DSL syntax, the output will be like:
 
 ```swift
 let stackLayout = VStackLayout {
