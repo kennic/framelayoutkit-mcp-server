@@ -128,23 +128,21 @@ Add to your Continue configuration:
 Generated Swift code:
 
 ```swift
-let stackLayout = VStackLayout()
-stackLayout.spacing = 20
-stackLayout.distribution = .center
-stackLayout.padding(16)
-
 // Add views to stack
 let titleLabel = {
     let label = UILabel()
     label.text = "Welcome"
     return label
 }()
-stackLayout + titleLabel
 let button = {
     let button = UIButton(type: .system)
     button.setTitle("Get Started", for: .normal)
     return button
 }()
+
+let stackLayout = VStackLayout()
+stackLayout.spacing(20).distribution(.center).padding(16)
+stackLayout + titleLabel
 stackLayout + button
 ```
 
