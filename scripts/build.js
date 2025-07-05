@@ -86,14 +86,14 @@ const webContent = `<!DOCTYPE html>
         <h2>🚀 Quick Install</h2>
         <pre><code>npx install-mcp https://mcp.framelayoutkit.dev/sse --client claude</code></pre>
         <p>Or via npm:</p>
-        <pre><code>npm install -g @namkennic/framelayoutkit-mcp</code></pre>
+        <pre><code>npm install -g framelayoutkit-mcp-server</code></pre>
     </div>
 
     <h2>✨ Features</h2>
     
     <div class="feature">
         <h3>🎨 Code Generation</h3>
-        <p>Generate FrameLayoutKit code for various layout types including VStack, HStack, Grid, and Flow layouts.</p>
+        <p>Generate FrameLayoutKit code for various layout types including VStackLayout, HStackLayout, GridLayout, and FlowLayout layouts.</p>
     </div>
 
     <div class="feature">
@@ -129,7 +129,7 @@ const webContent = `<!DOCTYPE html>
     <p>For detailed documentation and examples, visit the <a href="https://github.com/kennic/FrameLayoutKit">FrameLayoutKit repository</a>.</p>
 
     <footer style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-        <p>Made with ❤️ by <a href="https://github.com/namkennic">Nam Kennic</a></p>
+        <p>Made with ❤️ by <a href="https://github.com/kennic">Nam Kennic</a></p>
     </footer>
 </body>
 </html>`;

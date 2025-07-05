@@ -1,6 +1,6 @@
 {
   "name": "framelayoutkit-mcp-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Model Context Protocol server for FrameLayoutKit iOS framework - generates Swift UIKit code using FrameLayoutKit syntax",
   "main": "src/index.js",
   "files": [
@@ -12,10 +12,10 @@
   "homepage": "https://mcp.framelayoutkit.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/namkennic/framelayoutkit-mcp-server.git"
+    "url": "git+https://github.com/kennic/framelayoutkit-mcp-server.git"
   },
   "bugs": {
-    "url": "https://github.com/namkennic/framelayoutkit-mcp-server/issues"
+    "url": "https://github.com/kennic/framelayoutkit-mcp-server/issues"
   },
   "type": "module",
   "bin": {

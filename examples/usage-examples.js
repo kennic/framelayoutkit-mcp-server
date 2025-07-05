@@ -36,29 +36,27 @@ const example1Request = {
 
 // Expected output:
 /*
-let stackLayout = VStackLayout()
-stackLayout.spacing = 12
-stackLayout.distribution = .fill
-stackLayout.padding(20)
-
-// Add views to stack
 let titleLabel = {
     let label = UILabel()
     label.text = "Welcome to FrameLayoutKit"
     return label
 }()
-stackLayout + titleLabel
 let subtitleLabel = {
     let label = UILabel()
     label.text = "Build layouts easily"
     return label
 }()
-stackLayout + subtitleLabel
 let descriptionLabel = {
     let label = UILabel()
     label.text = "A powerful layout framework for iOS"
     return label
 }()
+
+let stackLayout = VStackLayout()
+stackLayout.spacing(12).distribution(.fill).padding(20)
+
+stackLayout + titleLabel
+stackLayout + subtitleLabel
 stackLayout + descriptionLabel
 */
 
@@ -124,9 +122,7 @@ NSLayoutConstraint.activate([
 // Expected output:
 /*
 let stackView = VStackLayout()
-stackView.axis = .vertical
-stackView.distribution = .equal
-stackView.spacing = 10
+stackView.axis(.vertical).distribution(.equal).spacing(10)
 
 stackView + label1
 stackView + label2

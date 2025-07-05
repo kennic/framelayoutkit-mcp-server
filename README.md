@@ -238,7 +238,7 @@ MIT License - see LICENSE file for details
 
 For issues and questions:
 
--   GitHub Issues: [framelayoutkit-mcp/issues](https://github.com/kennic/framelayoutkit-mcp/issues)
+-   GitHub Issues: [framelayoutkit-mcp/issues](https://github.com/kennic/framelayoutkit-mcp-server/issues)
 -   FrameLayoutKit Documentation: [FrameLayoutKit Docs](https://github.com/kennic/FrameLayoutKit)
 
 ## Acknowledgments
